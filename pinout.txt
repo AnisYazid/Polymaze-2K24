@@ -1,0 +1,21 @@
+hwtimer buzzerpin   = 23 d23
+gpio    motor1      = 13 d13
+gpio    motor1speed = 15 d12
+gpio    motor2      = 12 d15
+gpio    motor2speed = 4  d4
+gpio    red         = 5  d5
+gpio    green       = 17 tx2
+gpio    blue        = 16 rx2
+adc     qtr1        = 25 d25
+adc     qtr2        = 36 vp
+adc     qtr3        = 39 vn
+adc     qtr4        = 34 d34
+adc     qtr5        = 35 d35
+adc     qtr6        = 32 d32
+adc     qtr7        = 33 d33
+adc     qtr8        = 26 d26
+sda     color       = 21 d21
+sdc     color       = 22 d22
+adc 	irFront     = 17 d27
+
+remaining safe to use: 18,19,27

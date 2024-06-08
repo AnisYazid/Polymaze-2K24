@@ -1,13 +1,10 @@
 //based on the colorview example by adafruit
 #include <Wire.h>
 #include "Adafruit_TCS34725.h"
+#include "pins.h"
 
 //for rgb led
 // use ~560  ohm resistor between Red & Blue, ~1K for green (its brighter)
-//needs change
-#define redpin 5
-#define greenpin 17
-#define bluepin 16
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725();
 //for sensor input

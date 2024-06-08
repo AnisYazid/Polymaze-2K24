@@ -1,8 +1,8 @@
 #include <esp32-hal-timer.h>
+#include "pins.h"
 
 //needs change
 //make sure to know the hardware timer pins
-#define buzzerPin 23
 
 hw_timer_t *buzzerTimer = NULL;
 

@@ -1,7 +1,6 @@
-/*ir sensors*/
-//needs change
-#define SensorCount 8
-const int irSensorPins[SensorCount] = {25, 36, 39, 34, 35, 32, 33, 26};
+#include "pins.h"
+
+
 uint16_t sensorValues[SensorCount];
 uint16_t avgsensorValues[SensorCount][5];
 //uint16_t position;

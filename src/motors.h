@@ -1,10 +1,4 @@
-/*motors*/
-//needs change
-#define motor1      13   // right wheel
-#define motor2      12   // left wheel
-#define motor1Speed 15	 // right wheel speed 
-#define motor2Speed 4	 // left wheel speed
-
+#include "pins.h"
 
 void back(int speed1, int speed2){
 	digitalWrite(motor1,1);

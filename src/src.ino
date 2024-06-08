@@ -9,7 +9,9 @@ int turningTime= 1500; //time to turn
 int motorspeed1 = 150;
 int motorspeed2 = 150;
 
-/*start main*/
+const int DirectionSwitch = 2; //placeholder for the moment
+bool direction;
+
 void setup() {
 	//motor setup
 	pinMode(motor1, OUTPUT);
@@ -30,6 +32,14 @@ void setup() {
 }
 
 void loop() {
+	direction = digitalRead(DirectionSwitch); // will change via menu placeholder for the moment
+	
+	while (true){
+		wallFollow();
+	}
+}
+
+void wallFollow(){
 	//this should be enough for line following
 	irScan();
 	detectPostion();
@@ -41,15 +51,27 @@ void loop() {
 			forward(motorspeed1,motorspeed2);
 		}
 
-		//follow right wall 
+		//follow right wall or left wall
 		else { //intersection or turn
-			if(irRight || irFull) {
-				right(turningSpeed, turningSpeed);
-				delay(turningTime);
+			if (direction){
+				if(irRight || irFull) {
+					right(turningSpeed, turningSpeed);
+					delay(turningTime);
+				}
+				else{ 
+					left(turningSpeed, turningSpeed);
+					delay(turningTime);
+				}
 			}
-			else{ 
-				left(turningSpeed, turningSpeed);
-				delay(turningTime);
+			else{
+				if(irLeft || irFull) {
+					left(turningSpeed, turningSpeed);
+					delay(turningTime);
+				}
+				else{ 
+					right(turningSpeed, turningSpeed);
+					delay(turningTime);
+				}
 			}
 		}
 	}

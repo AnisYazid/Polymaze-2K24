@@ -64,7 +64,6 @@ void gammaSetup(){
 }
 
 //to be in setup code
-/*
 void ledSetup(){
 	ledcAttachPin(redpin, 1);
 	ledcSetup(1, 12000, 8);
@@ -73,7 +72,6 @@ void ledSetup(){
 	ledcAttachPin(bluepin, 3);
 	ledcSetup(3, 12000, 8);
 }
-*/
 
 //detects the colors
 void detectColor(){
@@ -132,12 +130,7 @@ void lightLed(){
 		break;
 	}
 	//ngl still not sure bout the gammatable but adafruit say it gud so
-	/*
 	ledcWrite(1,gammatable[(int)red]);
 	ledcWrite(2, gammatable[(int)green]);
 	ledcWrite(3, gammatable[(int)blue]);
-	*/
 }
-
-
-

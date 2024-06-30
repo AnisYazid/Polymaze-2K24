@@ -1,8 +1,8 @@
-float Kp = 0.050; // related to the proportional control term;
+float Kp = 1; // related to the proportional control term;
 // change the value by trial-and-error (ex: 0.07).
-float Ki = 0.0000; // related to the integral control term;
+float Ki = 0; // related to the integral control term;
 // change the value by trial-and-error (ex: 0.0008).
-float Kd = 0.80; // related to the derivative control term;
+float Kd = 0; // related to the derivative control term;
 // change the value by trial-and-error (ex: 0.6).
 
 int P;
@@ -31,8 +31,8 @@ void pidControl(int position) {
 
   int motorspeed = P * Kp + I * Ki + D * Kd; // calculate the correction
 
-  motorspeeda = basespeeda - motorspeed;
-  motorspeedb = basespeedb + motorspeed;
+  motorspeeda = basespeeda + motorspeed;
+  motorspeedb = basespeedb - motorspeed;
 
   if (motorspeeda > maxspeeda) {
     motorspeeda = maxspeeda;

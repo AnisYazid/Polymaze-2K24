@@ -10,7 +10,8 @@
 #define motor2Speed 18 // left wheel speed
 
 #define SensorCount 8
-const int irSensorPins[SensorCount] = {25, 36, 39, 34, 35, 32, 33, 26};
+const int irSensorPins[SensorCount] = {26, 25, 36, 39, 34, 35, 32, 33};
+
 
 #define redpin 5
 #define greenpin 17

@@ -51,7 +51,7 @@ void wallFollow() {
 
   if (!irNothing) {                       // checks for line existance
     if (!(irRight || irLeft || irFull)) { // no intersections
-      pidControl();
+      pidControl(position);
       setMotors(motorspeeda, motorspeedb); // apply correction speed
       // forward(MOTOR_SPEED1,MOTOR_SPEED2);
     }
@@ -85,6 +85,6 @@ void lineFollow() {
   irScan();
   detectPostion();
 
-  pidControl();
+  pidControl(position);
   setMotors(motorspeeda, motorspeedb); // apply correction speed
 }

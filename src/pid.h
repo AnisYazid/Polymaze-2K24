@@ -21,7 +21,7 @@ int motorspeeda = 0;
 int motorspeedb = 0;
 
 // calcs corrected motor speeds
-void pidControl() {
+void pidControl(int position) {
   int error = 3500 - position; // 3500 is the ideal position (the center)
 
   P = error;

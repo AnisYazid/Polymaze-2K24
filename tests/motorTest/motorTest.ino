@@ -4,13 +4,15 @@ void setup() {
 	//motor setup
 	pinMode(motor1, OUTPUT);
 	pinMode(motor2, OUTPUT);
+	pinMode(motor3, OUTPUT);
+	pinMode(motor4, OUTPUT);
 	pinMode(motor1Speed, OUTPUT);
 	pinMode(motor2Speed, OUTPUT);
 }
 
 void loop() {
 	int speed1 = 255;
-	int speed2=255;
+	int speed2 = 255;
 
 	forward(speed1,speed2);
 	delay(2500);

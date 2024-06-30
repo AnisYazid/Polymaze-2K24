@@ -4,10 +4,10 @@
 #include "buzzer.h"
 #include "pid.h"
 
-int turningSpeed= 150; //speed that it turns with
-int turningTime= 1500; //time to turn
-int motorspeed1 = 150;
-int motorspeed2 = 150;
+const int TURNING_SPEED = 150; //speed that it turns with
+const int TURNING_TIME = 1500; //time to turn
+const int MOTOR_SPEED1 = 150;
+const int MOTOR_SPEED2 = 150;
 
 const int DirectionSwitch = 2; //placeholder for the moment
 bool direction;
@@ -16,6 +16,8 @@ void setup() {
 	//motor setup
 	pinMode(motor1, OUTPUT);
 	pinMode(motor2, OUTPUT);
+	pinMode(motor3, OUTPUT);
+	pinMode(motor4, OUTPUT);
 	pinMode(motor1Speed, OUTPUT);
 	pinMode(motor2Speed, OUTPUT);
 	//qtr setup
@@ -31,12 +33,17 @@ void setup() {
 	buzzer();
 }
 
+
+
 void loop() {
-	direction = digitalRead(DirectionSwitch); // will change via menu placeholder for the moment
+	// direction = digitalRead(DirectionSwitch); // will change via menu placeholder for the moment
 	
-	while (true){
-		wallFollow();
-	}
+	// while (true){
+	//	wallFollow();
+	// }
+
+	lineFollow();
+
 }
 
 void wallFollow(){
@@ -44,38 +51,47 @@ void wallFollow(){
 	irScan();
 	detectPostion();
 
-	if (!irNothing){//checks for line existance
-		if(!(irRight || irLeft || irFull)){//no intersections
-			//pidControl();
-			//setMotors(motorspeed1, motorspeed2); //apply correction speed
-			forward(motorspeed1,motorspeed2);
+	if (!irNothing){ //checks for line existance
+		if(!(irRight || irLeft || irFull)){ //no intersections
+			pidControl();
+			setMotors(motorspeeda, motorspeedb); //apply correction speed
+			// forward(MOTOR_SPEED1,MOTOR_SPEED2);
 		}
 
 		//follow right wall or left wall
 		else { //intersection or turn
-			if (direction){
+			if (direction){ //follow right wall
 				if(irRight || irFull) {
-					right(turningSpeed, turningSpeed);
-					delay(turningTime);
+					right(TURNING_SPEED, TURNING_SPEED);
+					delay(TURNING_TIME);
 				}
 				else{ 
-					left(turningSpeed, turningSpeed);
-					delay(turningTime);
+					left(TURNING_SPEED, TURNING_SPEED);
+					delay(TURNING_TIME);
 				}
 			}
-			else{
+			else{ // follow left wall
 				if(irLeft || irFull) {
-					left(turningSpeed, turningSpeed);
-					delay(turningTime);
+					left(TURNING_SPEED, TURNING_SPEED);
+					delay(TURNING_TIME);
 				}
 				else{ 
-					right(turningSpeed, turningSpeed);
-					delay(turningTime);
+					right(TURNING_SPEED, TURNING_SPEED);
+					delay(TURNING_TIME);
 				}
 			}
 		}
 	}
 	else{ //worst case scenario when it doesn't find a line
-		left(turningSpeed,turningSpeed); //rotate till death
+		left(TURNING_SPEED,TURNING_SPEED); //rotate till death
+		
 	}
+}
+
+void lineFollow(){
+	irScan();
+	detectPostion();
+
+	pidControl();
+	setMotors(motorspeeda, motorspeedb); //apply correction speed
 }

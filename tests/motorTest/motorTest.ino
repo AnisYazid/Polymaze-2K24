@@ -22,4 +22,10 @@ void loop() {
 	delay(2500);
 
 	//try setMotors if ur done
+	// setMotors(200,0);
+	// delay(2500);
+	// setMotors(0,200);
+	// delay(2500);
+	// setMotors(0,0);
+	// delay(2500);
 }

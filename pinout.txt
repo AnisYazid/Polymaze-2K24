@@ -1,21 +1,30 @@
-hwtimer buzzerpin   = 23 d23
-gpio    motor1      = 13 d13
-gpio    motor1speed = 15 d12
-gpio    motor2      = 12 d15
-gpio    motor2speed = 4  d4
-gpio    red         = 5  d5
-gpio    green       = 17 tx2
-gpio    blue        = 16 rx2
-adc     qtr1        = 25 d25
-adc     qtr2        = 36 vp
-adc     qtr3        = 39 vn
-adc     qtr4        = 34 d34
-adc     qtr5        = 35 d35
-adc     qtr6        = 32 d32
-adc     qtr7        = 33 d33
-adc     qtr8        = 26 d26
-sda     color       = 21 d21
-sdc     color       = 22 d22
-adc 	irFront     = 17 d27
+hwtimer buzzerpin   = 23 
 
-remaining safe to use: 18,19,27
+gpio    motor1      = 14 
+gpio    motor2      = 15 
+gpio    motor1speed = 12 
+gpio    motor3      = 4  
+gpio    motor4      = 13 
+gpio    motor2speed = 18 
+
+adc     qtr1        = 26 
+adc     qtr2        = 25 
+adc     qtr3        = 36 
+adc     qtr4        = 39 
+adc     qtr5        = 34 
+adc     qtr6        = 35 
+adc     qtr7        = 32 
+adc     qtr8        = 33 
+
+sda     color       = 21 
+sdc     color       = 22 
+
+gpio 	irFront     = 17 
+adc     irLeft      = 2
+adc	irRight     = 27
+
+gpio	okButton    = 16
+gpio 	upButton    = 5
+gpio    downButton  = 19
+
+remaining safe to use:  0

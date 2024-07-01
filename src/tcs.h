@@ -51,9 +51,9 @@ void gammaSetup() {
 
 // to be in setup code
 void ledSetup() {
-  ledcAttach(redpin,  12000, 8);
-  ledcAttach(greenpin,  12000, 8);
-  ledcAttach(bluepin,  12000, 8);
+  // ledcAttach(redpin,  12000, 8);
+  // ledcAttach(greenpin,  12000, 8);
+  // ledcAttach(bluepin,  12000, 8);
 }
 
 // detects the colors

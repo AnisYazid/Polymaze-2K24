@@ -3,14 +3,20 @@
 #include "pid.h"
 #include "qtr.h"
 #include "tcs.h"
+#include "algo.h"
 
 const int TURNING_SPEED = 150; // speed that it turns with
 const int TURNING_TIME = 1500; // time to turn
+const int DEADEND_TIME = 1000; // time to uturn at dead end
 const int MOTOR_SPEED1 = 150;
 const int MOTOR_SPEED2 = 150;
 
-const int DirectionSwitch = 2; // placeholder for the moment
-bool direction;
+const bool RIGHT_WALL = true;
+bool discovered = false;
+bool ready = false;
+
+char path[100]; 
+int pathLength = 0;
 
 void setup() {
   // motor setup
@@ -24,67 +30,168 @@ void setup() {
   for (int i = 0; i < SensorCount; i++) {
     pinMode(irSensorPins[i], INPUT);
   }
+  // extra ir sensors
+  pinMode(irRightPin, INPUT);
+  pinMode(irLeftPin, INPUT);
+  pinMode(irFrontPin, INPUT);
   // tcs setup
   gammaSetup();
-  ledSetup();
   // buzzer setup
   pinMode(buzzerPin, OUTPUT);
+  // button setup
+  pinMode(okButton, INPUT);
+  pinMode(upButton, INPUT);
+  pinMode(downButton, INPUT);
+
   // indicate the beginning of the end
   buzzer();
 }
 
 void loop() {
-  // direction = digitalRead(DirectionSwitch); // will change via menu
-  // placeholder for the moment
-
-  // while (true){
-  //	wallFollow();
-  // }
-
-  lineFollow();
+  //lineFollow();
+  //wallFollow();
+  smartTurn();
 }
 
-void wallFollow() {
+char wallFollow() {
   // this should be enough for line following
   irScan();
   detectPostion();
+  char turn = 'F';  // default direction
 
-  if (!irNothing) {                       // checks for line existance
-    if (!(irRight || irLeft || irFull)) { // no intersections
-      pidControl(position);
+  if (!irNothing && !irEnd && !irDeadEnd) {  // checks for line existance and not the end
+    if (!(irRight || irLeft)) { // no intersections
+      pidControl(position); // calculate correction speed
       setMotors(motorspeeda, motorspeedb); // apply correction speed
       // forward(MOTOR_SPEED1,MOTOR_SPEED2);
     }
 
     // follow right wall or left wall
     else {             // intersection or turn
-      if (direction) { // follow right wall
-        if (irRight || irFull) {
-          right(TURNING_SPEED, TURNING_SPEED);
-          delay(TURNING_TIME);
-        } else {
-          left(TURNING_SPEED, TURNING_SPEED);
-          delay(TURNING_TIME);
+      if (RIGHT_WALL){ // follow right wall
+        if (irRight) { // turn right if there is a right turn
+          turnRight();
+          turn = 'R';
+        } 
+        else if (irFront) { // follow the line
+          pidControl(position); // calculate correction speed
+          setMotors(motorspeeda, motorspeedb); // apply correction speed
+          turn = 'S';
         }
+        else if (irLeft) { // there is only left turn
+          turnLeft();
+          turn = 'L';
+        }
+
       } else { // follow left wall
-        if (irLeft || irFull) {
-          left(TURNING_SPEED, TURNING_SPEED);
-          delay(TURNING_TIME);
-        } else {
-          right(TURNING_SPEED, TURNING_SPEED);
-          delay(TURNING_TIME);
+        if (irLeft) { // turn left if there is a left turn
+          turnLeft();
+          turn = 'L';
+        }
+        else if (irFront) { // follow the line
+          pidControl(position); // calculate correction speed
+          setMotors(motorspeeda, motorspeedb); // apply correction speed
+          turn = 'S';
+        }
+        else if (irRight) { // there is only right turn
+          turnRight();
+          turn = 'R';
         }
       }
     }
+  } else if (irDeadEnd){
+    setMotors(TURNING_SPEED,-TURNING_SPEED);
+    delay(DEADEND_TIME);
+    turn = 'B';
+  } else if (irEnd) { // end of the maze
+      forward(0, 0);
+      buzzer();
+      turn = 'E';
   } else { // worst case scenario when it doesn't find a line
-    left(TURNING_SPEED, TURNING_SPEED); // rotate till death
+    // left(TURNING_SPEED, TURNING_SPEED); // rotate till death
+    buzzer();
+    forward(0, 0); // stop
   }
+  return turn; // the direction it turned
 }
 
 void lineFollow() {
   irScan();
   detectPostion();
 
-  pidControl(position);
-  setMotors(motorspeeda, motorspeedb); // apply correction speed
+  if (irNothing) {
+    buzzer();
+    forward(0, 0);
+  }
+  else{
+    pidControl(position);
+    setMotors(motorspeeda, motorspeedb); // apply correction speed
+  }
+}
+
+void smartTurn() {
+  char turn;
+  
+  if (!ready) { // wait for the button to be pressed
+    if (digitalRead(okButton) == HIGH) {
+      ready = true;
+    }
+  }
+  else if (!discovered && ready){ // discovering the maze
+    irScan();
+    detectPostion();
+    turn = wallFollow(); // turn accordingly and return the direction if it turned
+
+    if (turn != 'E') { // if it didn't reach the end 
+      markDirection(turn, path, &pathLength);
+    }
+    else{ // it reached the end
+      discovered = true;
+      ready = false;
+      forward(0, 0);
+      buzzer();
+    }
+  }
+  else if (discovered && ready){ // solving the maze
+    irScan();
+    detectPostion();
+
+    if (!irEnd) { // if it didn't reach the end 
+      followDirection(turn);
+    }
+    else{ // it reached the end
+      ready = false;
+      forward(0, 0);
+      buzzer();
+    }
+  }
+}
+
+void followDirection(char turn) { // placeholder please change
+  if( irRight || irLeft || irFront){
+    }
+    else if (turn == 'R') {
+      turnRight();
+    }
+    else if (turn == 'L') {
+      turnLeft();
+    }
+    else if (turn == 'B') {
+      uTurn();
+    }
+}
+
+
+void turnRight(){
+  right(TURNING_SPEED, TURNING_SPEED);
+  delay(TURNING_TIME);
+}
+
+void turnLeft(){
+  left(TURNING_SPEED, TURNING_SPEED);
+  delay(TURNING_TIME);
+}
+
+void uTurn(){
+
 }

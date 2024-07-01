@@ -5,9 +5,9 @@ uint16_t avgsensorValues[SensorCount][5];
 // uint16_t position;
 float position;
 uint16_t readsum;
-const int leftbound = 2000;  // 3000;
-const int rightbound = 5000; // 4000;
-const int thres = 3100;      // threshhold value, max sensor reading is 4095
+const int leftbound = 3100;  // 3000;
+const int rightbound = 3800; // 4000;
+const int thres = 3000;      // threshhold value, max sensor reading is 4095
 bool irFull = false;
 bool irRight = false;
 bool irLeft = false;
@@ -18,6 +18,8 @@ const int thresFr = 1000;
 const int irFrontpin = 27;
 int frontReading = 0;
 bool irFront = false;
+bool irEnd = false; // needs implementation
+bool irDeadEnd = false; // needs implementation
 
 void irScan() {
   // Read each sensor 5 times and store the readings in an array

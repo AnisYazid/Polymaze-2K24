@@ -16,7 +16,7 @@ const uint8_t maxspeedb = 255;
 const uint8_t minspeeda = 55;
 const uint8_t minspeedb = 55;
 const uint8_t basespeeda = 180;
-const uint8_t basespeedb = 1800;
+const uint8_t basespeedb = 180;
 int motorspeeda = 0;
 int motorspeedb = 0;
 

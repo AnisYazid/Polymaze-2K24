@@ -22,8 +22,9 @@ void setup() {
 
 void loop() {
 	int i;
+	IRState irstates;
 	irScan();
-	detectPostion();
+	irstates = detectPostion();
 	Serial.print("sensorValues: ");
 		for(i=0; i< SensorCount; i++){
 			Serial.print(sensorValues[i]);
@@ -35,16 +36,25 @@ void loop() {
 	Serial.print("readsum: ");
 	Serial.println(readsum);
 	Serial.print("irFull: ");
-	Serial.println(irFull);
+	Serial.println(irstates.irFull);
 	Serial.print("irRight: ");
-	Serial.println(irRight);
+	Serial.println(irstates.irRight);
 	Serial.print("irLeft: ");
-	Serial.println(irLeft);
+	Serial.println(irstates.irLeft);
 	Serial.print("irNothing: ");
-	Serial.println(irNothing);
+	Serial.println(irstates.irNothing);
 	Serial.print("irMid: ");
-	Serial.println(irMid);
+	Serial.println(irstates.irMid);
 	Serial.print("irFront: ");
-	Serial.println(frontReading);
+	Serial.println(irstates.irFront);
+	Serial.print("irEnd: ");
+	Serial.println(irstates.irEnd);
+	Serial.print("irDeadEnd: ");
+	Serial.println(irstates.irDeadEnd);
+	Serial.print("irRightMost: ");
+	Serial.println(irstates.irRightMost);
+	Serial.print("irLeftMost: ");
+	Serial.println(irstates.irLeftMost);
+	Serial.println("_________________________");
 	delay(800);
 }

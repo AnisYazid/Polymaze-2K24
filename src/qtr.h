@@ -68,44 +68,47 @@ void irScan() {
 }
 
 IRState detectPostion() {
-  IRState state = {false, false, false, false, false, false, false, false, false, false};
+  IRState state = {false, false, false, false, false,
+                   false, false, false, false, false};
   uint16_t sensorState = 0;
 
   // Define the bitmasks for the different IR sensor states
-  const uint16_t IR_FULL_MASK    = 0b11111111;
-  const uint16_t IR_LEFT_MASK    = 0b11000000;
+  const uint16_t IR_FULL_MASK = 0b11111111;
+  const uint16_t IR_LEFT_MASK = 0b11000000;
   // const uint16_t IR_MID_MASK     = 0b00011000;
-  const uint16_t IR_RIGHT_MASK   = 0b00000011;
+  const uint16_t IR_RIGHT_MASK = 0b00000011;
   const uint16_t IR_NOTHING_MASK = 0b00000000;
 
   // Combine the sensor values into a single var
-  for (int i = 0; i < SensorCount ; i++) {
-      sensorState |= ((sensorValues[i] >= thres) << i );
+  for (int i = 0; i < SensorCount; i++) {
+    sensorState |= ((sensorValues[i] >= thres) << i);
   }
-  
+
   // check for qtr states
-  if ((sensorState & IR_FULL_MASK) == IR_FULL_MASK){
+  if ((sensorState & IR_FULL_MASK) == IR_FULL_MASK) {
     state.irFull = true;
-  } else if ((sensorState & IR_LEFT_MASK) == IR_LEFT_MASK){
+  } else if ((sensorState & IR_LEFT_MASK) == IR_LEFT_MASK) {
     state.irLeft = true;
-  //} else if ((sensorState & IR_MID_MASK) == IR_MID_MASK){ 
-  //  state.irMid = true;
-  } else if ((sensorState & !IR_LEFT_MASK) & (sensorState & !IR_RIGHT_MASK)){ // check for not left and right WIP
+    //} else if ((sensorState & IR_MID_MASK) == IR_MID_MASK){
+    //  state.irMid = true;
+  } else if ((sensorState & !IR_LEFT_MASK) &
+             (sensorState &
+              !IR_RIGHT_MASK)) { // check for not left and right WIP
     state.irMid = true;
-  } else if ((sensorState & IR_RIGHT_MASK) == IR_RIGHT_MASK){
+  } else if ((sensorState & IR_RIGHT_MASK) == IR_RIGHT_MASK) {
     state.irRight = true;
-  } else if ((sensorState & IR_NOTHING_MASK) == IR_NOTHING_MASK){
+  } else if ((sensorState & IR_NOTHING_MASK) == IR_NOTHING_MASK) {
     state.irNothing = true;
   }
 
   // check for individual sensors
-  if (frontReading){
+  if (frontReading) {
     state.irFront = true;
   }
-  if (rightReading >= thresSides){
+  if (rightReading >= thresSides) {
     state.irRightMost = true;
   }
-  if (leftReading >= thresSides){
+  if (leftReading >= thresSides) {
     state.irLeftMost = true;
   }
 

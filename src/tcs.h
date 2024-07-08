@@ -6,14 +6,12 @@
 Adafruit_TCS34725 tcs = Adafruit_TCS34725();
 
 void setupTCS() {
-    if (tcs.begin()) {
-        Serial.println("Found color sensor");
-    } else {
-        Serial.println("No TCS34725 found ");
-        while (1);
-    }
+  if (tcs.begin()) {
+    Serial.println("Found color sensor");
+  } else {
+    Serial.println("No TCS34725 found ");
+  }
 }
-
 
 // for sensor input
 float red, green, blue;
@@ -30,7 +28,7 @@ const float upper_bounds[][3] = {
 };
 
 // for outputs
-enum Colors { RED,  BLUE, NO_COLOR };
+enum Colors { RED, BLUE, NO_COLOR };
 const int NUM_COLORS = Colors::NO_COLOR;
 Colors color;
 
@@ -55,13 +53,13 @@ void detectColor() {
 void colorAction() {
   switch (color) {
   case RED:
-      // do something
+    // do something
     break;
   case BLUE:
-      // do something
+    // do something
     break;
   default:
-      // do something
+    // do something
     break;
   }
 }

@@ -1,20 +1,13 @@
 #include "tcs.h"
 
-
 void task(void *parameter){
-	ledSetup();
 	while(1){
 		detectColor();
-		lightLed();
 	}
 }
 
 void setup() {
 	Serial.begin(9600); 
-	//ledSetup();
-	gammaSetup();
-	//ledSetup();
-
 	if (tcs.begin()) {
 	    Serial.println("Found sensor");
 	  } else {

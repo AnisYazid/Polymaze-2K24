@@ -24,3 +24,7 @@ upload:
 .PHONY: clean
 clean:
 	@rm -rf $(BUILD_DIR)
+
+.PHONY: format
+format:
+	@clang-format -i $(SKETCH)/*.ino $(SKETCH)/*.h 

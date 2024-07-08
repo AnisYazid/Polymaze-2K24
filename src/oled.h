@@ -1,3 +1,4 @@
+#include "qtr.h"
 #include <Adafruit_SSD1306.h>
 
 // OLED display settings
@@ -45,6 +46,20 @@ void displayMenu() {
   display.display();
 }
 
+void executeMenuAction(int index) {
+  switch (index) {
+  case 0:
+    Serial.println("Anis");
+    break;
+  case 1:
+    Serial.println("Delegue");
+    break;
+  case 2:
+    Serial.println("Foufou");
+    break;
+  }
+}
+
 void oledMenu(bool buttonup, bool buttondown, bool buttonOk) {
   if (buttonup == LOW) {
     currentMenuIndex--;
@@ -64,19 +79,5 @@ void oledMenu(bool buttonup, bool buttondown, bool buttonOk) {
 
   if (buttonOk == LOW) {
     executeMenuAction(currentMenuIndex);
-  }
-}
-
-void executeMenuAction(int index) {
-  switch (index) {
-  case 0:
-    Serial.println("Anis");
-    break;
-  case 1:
-    Serial.println("Delegue");
-    break;
-  case 2:
-    Serial.println("Foufou");
-    break;
   }
 }

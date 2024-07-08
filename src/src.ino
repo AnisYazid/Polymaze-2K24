@@ -38,9 +38,10 @@ void setup() {
   pinMode(motor1Speed, OUTPUT);
   pinMode(motor2Speed, OUTPUT);
   // qtr setup
-  for (int i = 0; i < SensorCount; i++) {
-    pinMode(irSensorPins[i], INPUT);
-  }
+  // for (int i = 0; i < SensorCount; i++) {
+  // pinMode(irSensorPins[i], INPUT);
+  //}
+  setupQTR();
   // extra ir sensors
   pinMode(irRightPin, INPUT_PULLUP);
   pinMode(irLeftPin, INPUT_PULLUP);
@@ -56,7 +57,10 @@ void setup() {
 
   // start calibration
   buzzer();
-  // calibrate();
+  for (uint16_t i = 0; i < 400; i++) {
+    qtr.calibrate();
+  }
+  Serial.print("finished cal");
 
   // indicate the beginning of the end
   buzzer(2);

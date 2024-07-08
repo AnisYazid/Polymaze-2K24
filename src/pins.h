@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #define buzzerPin 23
 
 #define motor1 14      // right wheel
@@ -18,4 +19,4 @@
 #define irRightPin 27 // analog
 
 #define SensorCount 8
-const int irSensorPins[SensorCount] = {26, 25, 36, 39, 34, 35, 32, 33};
+const uint8_t irSensorPins[SensorCount] = {26, 25, 36, 39, 34, 35, 32, 33};

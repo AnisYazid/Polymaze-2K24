@@ -1,9 +1,30 @@
+#pragma once
 #include "pins.h"
+#include <QTRSensors.h>
+
+class ESP32QTRSensors : public QTRSensors {
+public:
+  void setTypeAnalog() {
+    _type = QTRType::Analog;
+    _maxValue = 4096; // Override the _maxValue to 4096
+  }
+
+protected:
+  QTRType _type = QTRType::Analog;
+  uint16_t _maxValue = 4096;
+};
+ESP32QTRSensors qtr;
+
+void setupQTR() {
+  qtr.setTypeAnalog();
+  qtr.setSensorPins(irSensorPins,
+                    SensorCount);
+}
 
 uint16_t sensorValues[SensorCount];
 uint16_t avgsensorValues[SensorCount][5];
-// uint16_t position;
-float position;
+uint16_t position;
+// float position;
 uint16_t readsum;
 const int leftbound = 3100;  // 3000;
 const int rightbound = 3800; // 4000;
@@ -28,40 +49,12 @@ typedef struct {
 } IRState;
 
 void irScan() {
-  // Read each sensor 5 times and store the readings in an array
-  for (int j = 0; j < 5; j++) {
-    for (int i = 0; i < SensorCount; i++) {
-      avgsensorValues[i][j] = analogRead(irSensorPins[i]);
-    }
-  }
-
-  // Calculate the average value for each sensor
-  for (int i = 0; i < SensorCount; i++) {
-    int sum = 0;
-    for (int j = 0; j < 5; j++) {
-      sum += avgsensorValues[i][j];
-    }
-    sensorValues[i] = sum / 5;
-  }
-
   frontReading = digitalRead(irFrontpin);
   rightReading = analogRead(irRightPin);
   leftReading = analogRead(irLeftPin);
 
-  // resets vars
-  position = 0;
-  readsum = 0;
-  int i;
+  position = qtr.readLineBlack(sensorValues);
 
-  // calculating weighted average
-  for (i = 0; i < SensorCount; i++) {
-    position += i * 1000 * sensorValues[i];
-    readsum += sensorValues[i];
-  }
-
-  if (readsum > 0) {
-    position = position / readsum;
-  }
   // value is between 0 and 7000
   // 0 to the right, 1000 for each sensor
   // 7000 to the left

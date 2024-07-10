@@ -1,3 +1,4 @@
+#pragma once
 #include "qtr.h"
 #include <Adafruit_SSD1306.h>
 
@@ -30,7 +31,7 @@ void oledPrintBars() {
 int currentMenuIndex = 0;
 const int menuItems = 3;
 
-String menu[menuItems] = {"Anis", "Delegue", "Foufou"};
+String menu[menuItems] = {"Follow Right Wall", "Follow Left Wall", "Ready!"};
 
 void displayMenu() {
   display.clearDisplay();
@@ -49,18 +50,18 @@ void displayMenu() {
 void executeMenuAction(int index) {
   switch (index) {
   case 0:
-    Serial.println("Anis");
+    // direction = right;
     break;
   case 1:
-    Serial.println("Delegue");
+    // direction = left;
     break;
   case 2:
-    Serial.println("Foufou");
+    // ready = true;
     break;
   }
 }
 
-void oledMenu(bool buttonup, bool buttondown, bool buttonOk) {
+void oledMenuControl(bool buttonup, bool buttondown, bool buttonOk) {
   if (buttonup == LOW) {
     currentMenuIndex--;
     if (currentMenuIndex < 0) {
@@ -79,5 +80,87 @@ void oledMenu(bool buttonup, bool buttondown, bool buttonOk) {
 
   if (buttonOk == LOW) {
     executeMenuAction(currentMenuIndex);
+  }
+}
+
+
+
+
+
+
+void displayPrisonBreak() {
+  // Draw the text "PRISON BREAK" centered on the display, with alternating
+  // colors and flashing
+  int16_t x = display.width() / 2;
+  int16_t y = display.height() / 2;
+  for (int i = 0; i < 4; i++) {
+    display.setTextSize(2);
+    if (i % 2 == 0) {
+      display.setTextColor(SSD1306_WHITE);
+    } else {
+      display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Inverted color
+    }
+    display.setCursor(x - (12 * 8) / 2,
+                      y - 8 / 2); // Adjust the x and y positions as needed
+    display.println("PRISON BREAK");
+    display.display();
+    delay(200); // Pause for 0.5 seconds
+    display.clearDisplay();
+    display.display();
+    delay(200); // Pause for 0.5 seconds
+  }
+  display.setTextSize(1);
+}
+
+
+
+
+
+int currentMenuIndex2 = 0;
+const int menuItems2 = 1;
+
+String menu2[menuItems2] = { "Final Ready!"};
+
+void displayMenu2() {
+  display.clearDisplay();
+  for (int i = 0; i < menuItems2; i++) {
+    if (i == currentMenuIndex2) {
+      display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    } else {
+      display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);
+    }
+    display.setCursor(0, i * 10);
+    display.print(menu2[i]);
+  }
+  display.display();
+}
+
+void executeMenuAction2(int index) {
+  switch (index) {
+  case 0:
+    // direction = right;
+    break;
+  }
+}
+
+void oledMenuControl2(bool buttonup, bool buttondown, bool buttonOk) {
+  if (buttonup == LOW) {
+    currentMenuIndex2--;
+    if (currentMenuIndex2 < 0) {
+      currentMenuIndex2 = menuItems2 - 1;
+    }
+    displayMenu2();
+  }
+
+  if (buttondown == LOW) {
+    currentMenuIndex2++;
+    if (currentMenuIndex2 >= menuItems) {
+      currentMenuIndex2 = 0;
+    }
+    displayMenu2();
+  }
+
+  if (buttonOk == LOW) {
+    executeMenuAction2(currentMenuIndex2);
   }
 }

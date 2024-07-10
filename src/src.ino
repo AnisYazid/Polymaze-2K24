@@ -1,6 +1,6 @@
 #include "algo.h"
 #include "buzzer.h"
-#include "main2.h"
+//#include "main2.h"
 #include "motors.h"
 #include "oled.h"
 #include "pid.h"
@@ -19,8 +19,8 @@ const int MOTOR_SPEED2 = 150;
 
 const bool WALL_FOLLOWING_DIR = go_right;
 
-// bool discovered = false;
-// bool ready = false;
+bool discovered = false;
+bool ready = false;
 
 char path[100];
 int pathLength = 0;
@@ -50,7 +50,7 @@ void setup() {
   // buzzer setup
   pinMode(buzzerPin, OUTPUT);
   // main2 setup
-  setupMain2();
+  //setupMain2();
 
   // start calibration
   buzzer();

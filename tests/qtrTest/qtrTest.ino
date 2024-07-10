@@ -20,10 +20,6 @@ void setup() {
 	buzzer();
 	setupQTR();
 
-  for (uint16_t i = 0; i < 400; i++)
-  {
-    qtr.calibrate();
-  }
 	Serial.print("finished cal");
 	buzzer();
 }

@@ -10,15 +10,15 @@
 
 enum directionCheck { go_left, go_right }; // left == 0, right == 1
 
-const int TURNING_SPEED = 150; // speed that it turns with
-const int TURNING_TIME = 1500; // time to turn
-const int UTURN_TIME = 3000;   // time to uturn
+const int TURNING_SPEED = 80; // speed that it turns with
+//const int TURNING_TIME = 500; // time to turn
+const int UTURN_TIME = 1000;   // time to uturn
 const bool UTURN_DIR = go_right;
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
-const int STEP_SPEED = 150; // speed to step forward
-const int STEP_TIME = 300;  // time to step forward
-const int MOTOR_SPEED1 = 150;
-const int MOTOR_SPEED2 = 150;
+const int STEP_SPEED = 80; // speed to step forward
+const int STEP_TIME = 200;  // time to step forward
+// const int MOTOR_SPEED1 = 150;
+// const int MOTOR_SPEED2 = 150;
 
 const bool WALL_FOLLOWING_DIR = go_right;
 
@@ -68,30 +68,40 @@ void loop() {
 }
 
 void stepForward() {
-  forward(STEP_SPEED, STEP_SPEED);
+  // forward(STEP_SPEED, STEP_SPEED);
+  pidControl(position);                // calculate correction speed
+  setMotors(motorspeeda, motorspeedb); // apply correction speed
   delay(STEP_TIME);
 }
-void stepBackward() {
-  back(STEP_SPEED, STEP_SPEED);
-  delay(STEP_TIME);
-}
+// void stepBackward() {
+//   back(STEP_SPEED, STEP_SPEED);
+//   delay(STEP_TIME);
+// }
 
 void turnRight(bool doStep = true) {
   if (doStep) stepForward();
-  while (digitalRead(irFrontPin) == HIGH) {
+  right(TURNING_SPEED, TURNING_SPEED);
+  delay(50);
+  while (digitalRead(irFrontPin) == LOW) {
     right(TURNING_SPEED, TURNING_SPEED);
     delay(50);
   }
+  forward(0, 0);
+  delay(20);
   // right(TURNING_SPEED, TURNING_SPEED);
   // delay(TURNING_TIME);
 }
 
 void turnLeft(bool doStep = true) {
   if (doStep) stepForward();
-  while (digitalRead(irFrontPin) == HIGH) {
+  left(TURNING_SPEED, TURNING_SPEED);
+  delay(50);
+  while (digitalRead(irFrontPin) == LOW) {
     left(TURNING_SPEED, TURNING_SPEED);
     delay(50);
   }
+  forward(0, 0);
+  delay(20);
   // left(TURNING_SPEED, TURNING_SPEED);
   // delay(TURNING_TIME);
 }
@@ -121,97 +131,52 @@ void followDirection(char turn, bool doStep = true) { // placeholder please chan
 char wallFollow() {
   irScan();
   irState = detectPostion();
-  char turn = 'F'; // default direction
 
-  if (irState.irEnd) { // either end or cross
+  if (irState.irNothing){
+    forward(0, 0); // deadend
+    turnRight(false); //u turn
+    return 'B';
+  }
+  else if (irState.irFull){
     stepForward();
-    forward(0, 0);
     irScan();
     irState = detectPostion();
-    if (!irState.irEnd) { // this is a cross
-      // stepBackward();
-      //******** this is a copy
-      if (WALL_FOLLOWING_DIR) { // follow right wall
-        if (irState.irRight) {  // turn right if there is a right turn
-          turnRight(false);
-          return 'R';
-        } else if (irState.irFront) {          // follow the line
-          pidControl(position);                // calculate correction speed
-          setMotors(motorspeeda, motorspeedb); // apply correction speed
-          return 'S';
-        } else if (irState.irLeft) { // there is only left turn
-          turnLeft(false);
-          return 'L';
-        }
-
-      } else {                // follow left wall
-        if (irState.irLeft) { // turn left if there is a left turn
-          turnLeft(false);
-          return 'L';
-        } else if (irState.irFront) {          // follow the line
-          pidControl(position);                // calculate correction speed
-          setMotors(motorspeeda, motorspeedb); // apply correction speed
-          return 'S';
-        } else if (irState.irRight) { // there is only right turn
-          turnRight(false);
-          return 'R';
-        }
-      }
-      //******** this is a copy
-    } else { // the end
+    if (irState.irFull){
+      // end
       forward(0, 0);
-      // buzzer(3);
       return 'E';
-    }
-  } else if (irState.irDeadEnd) {
-    uTurn(UTURN_DIR);
-    return 'B';
-  } else if (irState.irNothing) { // panic! no line detected
-    // buzzer();
-    forward(0, 0);
-    // return 'E';
-    return 'X';
-  } else if (!(irState.irRight || irState.irLeft) &&
-             irState.irMid) {            // no intersections
-    pidControl(position);                // calculate correction speed
-    setMotors(motorspeeda, motorspeedb); // apply correction speed
-    return 'F';
-  } else if (irState.irRight || irState.irLeft || irState.irFront) {
-    // intersection or turn
-    //******** this is a copy
-    if (WALL_FOLLOWING_DIR) { // follow right wall
-      if (irState.irRight) {  // turn right if there is a right turn
-        turnRight();
+    } else {
+      if (WALL_FOLLOWING_DIR ==  go_right) { //right
+        turnRight(false); // turn right since it is a T
         return 'R';
-      } else if (irState.irFront) {          // follow the line
-        pidControl(position);                // calculate correction speed
-        setMotors(motorspeeda, motorspeedb); // apply correction speed
-        return 'S';
-      } else if (irState.irLeft) { // there is only left turn
-        turnLeft();
+      } else{ // left
+        turnLeft(false);
+        return 'L';
+      }
+    }
+  }
+  else if (irState.irMid && (irState.irRight || irState.irLeft)){
+    if (irState.irRight && !irState.irLeft){ // right only
+      turnRight(false); // turn right since it is a T
+      return 'R';
+    } else if (irState.irLeft && !irState.irRight){ // left only
+      turnLeft(false);
+      return 'L';
+    } else { // is both
+      if (WALL_FOLLOWING_DIR ==  go_right) { //right
+        turnRight(false); // turn right since it is a T
+        return 'R';
+      } else{ // left
+        turnLeft(false);
         return 'L';
       }
 
-    } else {                // follow left wall
-      if (irState.irLeft) { // turn left if there is a left turn
-        turnLeft();
-        return 'L';
-      } else if (irState.irFront) {          // follow the line
-        pidControl(position);                // calculate correction speed
-        setMotors(motorspeeda, motorspeedb); // apply correction speed
-        return 'S';
-      } else if (irState.irRight) { // there is only right turn
-        turnRight();
-        return 'R';
-      }
-      //******** this is a copy
     }
-  } else { // panic! no logic for situation
-    // buzzer();
-    forward(0, 0);
-    printIRState(irState);
-    // return turn; // the direction it turned
-    return 'X';
+  }
+  else if (irState.irMid && !(irState.irRight || irState.irLeft)){
+    pidControl(position);
+    setMotors(motorspeeda, motorspeedb);
+    return 'F';
   }
 }
 

@@ -1,8 +1,8 @@
-float Kp = 2.8; // related to the proportional control term;
+float Kp = 0.7; // related to the proportional control term;
 // change the value by trial-and-error (ex: 0.07).
 float Ki = 0; // related to the integral control term;
 // change the value by trial-and-error (ex: 0.0008).
-float Kd = 1.3; // related to the derivative control term;
+float Kd = 0.325; // related to the derivative control term;
 // change the value by trial-and-error (ex: 0.6).
 
 int P;
@@ -15,8 +15,8 @@ const uint8_t maxspeeda = 255;
 const uint8_t maxspeedb = 255;
 const uint8_t minspeeda = 55;
 const uint8_t minspeedb = 55;
-const uint8_t basespeeda = 180;
-const uint8_t basespeedb = 180;
+const uint8_t basespeeda = 100;
+const uint8_t basespeedb = 100;
 int motorspeeda = 0;
 int motorspeedb = 0;
 

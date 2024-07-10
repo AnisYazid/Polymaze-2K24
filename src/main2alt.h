@@ -2,7 +2,6 @@
 #include "pins.h"
 #include "tcs.h"
 
-
 void setupMain2() {
   // oled setup
   setupOLED();
@@ -15,15 +14,14 @@ void setupMain2() {
 void loopMain2(void *parameter) {
   while (true) {
     detectColor();
-      if (color == Colors::NO_COLOR) {
-        oledPrintBars();
-      } else {
-        colorAction();
-        delay(1000);
-      }
+    if (color == Colors::NO_COLOR) {
+      oledPrintBars();
+    } else {
+      colorAction();
+      delay(1000);
     }
   }
-
+}
 
 void startMain2() {
   xTaskCreatePinnedToCore(

@@ -1,6 +1,6 @@
 #include "algo.h"
-//#include "buzzer.h"
-//#include "main2.h"
+// #include "buzzer.h"
+// #include "main2.h"
 #include "main2alt.h"
 #include "motors.h"
 #include "oled.h"
@@ -16,7 +16,7 @@ const int UTURN_TIME = 3000;   // time to uturn
 const bool UTURN_DIR = go_right;
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
 const int STEP_SPEED = 150; // speed to step forward
-const int STEP_TIME = 500; // time to step forward
+const int STEP_TIME = 500;  // time to step forward
 const int MOTOR_SPEED1 = 150;
 const int MOTOR_SPEED2 = 150;
 
@@ -68,7 +68,7 @@ void loop() {
 }
 
 void turnRight() {
-  while(digitalRead(irFrontPin) == HIGH) {
+  while (digitalRead(irFrontPin) == HIGH) {
     right(TURNING_SPEED, TURNING_SPEED);
     delay(100);
   }
@@ -77,7 +77,7 @@ void turnRight() {
 }
 
 void turnLeft() {
-  while(digitalRead(irFrontPin) == HIGH) {
+  while (digitalRead(irFrontPin) == HIGH) {
     left(TURNING_SPEED, TURNING_SPEED);
     delay(100);
   }
@@ -110,10 +110,10 @@ char wallFollow() {
 
   if (irState.irEnd) { // either end or cross
     stepForward();
-    forward(0,0);
+    forward(0, 0);
     irScan();
     irState = detectPostion();
-    if (!irState.irEnd){ // this is a cross
+    if (!irState.irEnd) { // this is a cross
       stepBackward();
       //******** this is a copy
       if (WALL_FOLLOWING_DIR) { // follow right wall
@@ -143,20 +143,20 @@ char wallFollow() {
         }
       }
       //******** this is a copy
-    } else{ // the end
+    } else { // the end
       forward(0, 0);
-      //buzzer(3);
+      // buzzer(3);
       return 'E';
     }
   } else if (irState.irDeadEnd) {
     uTurn(UTURN_DIR);
     return 'B';
   } else if (irState.irNothing) { // panic! no line detected
-    //buzzer();
+    // buzzer();
     forward(0, 0);
     // return 'E';
     return 'X';
-  } else if (!(irState.irRight || irState.irLeft) && 
+  } else if (!(irState.irRight || irState.irLeft) &&
              irState.irMid) {            // no intersections
     pidControl(position);                // calculate correction speed
     setMotors(motorspeeda, motorspeedb); // apply correction speed
@@ -191,9 +191,8 @@ char wallFollow() {
       }
       //******** this is a copy
     }
-  }
-  else { // panic! no logic for situation
-    //buzzer();
+  } else { // panic! no logic for situation
+    // buzzer();
     forward(0, 0);
     printIRState(irState);
     // return turn; // the direction it turned
@@ -206,7 +205,7 @@ void lineFollow() {
   irState = detectPostion();
 
   if (irState.irNothing) {
-    //buzzer();
+    // buzzer();
     forward(0, 0);
   } else {
     pidControl(position);
@@ -221,31 +220,31 @@ void lineFollow() {
 int stepCount = 0;
 bool hasOptimized = false;
 void smartTurn() {
-char turn;
+  char turn;
 
   if (!discovered && !ready) { // wait for the button to be pressed
     if (digitalRead(okButton) == HIGH) {
       ready = true;
-      //buzzer();
+      // buzzer();
       delay(500);
     }
   } else if (!discovered && ready) { // discovering the maze
     turn =
         wallFollow(); // turn accordingly and return the direction if it turned
 
-    if (turn != 'E') { // if it didn't reach the end
+    if (turn != 'E') {                        // if it didn't reach the end
       markDirection(turn, path, &pathLength); // marks and increments
-    } else { // it reached the end
+    } else {                                  // it reached the end
       discovered = true;
       ready = false;
       forward(0, 0);
-      //buzzer();
+      // buzzer();
     }
   } else if (discovered && !ready) {
     if (!hasOptimized) {
       optimizePath(path, &pathLength, WALL_FOLLOWING_DIR);
       hasOptimized = true;
-      //buzzer();
+      // buzzer();
     } else {
       if (digitalRead(okButton) == HIGH) {
         ready = true;
@@ -268,7 +267,7 @@ char turn;
         stepCount++;
       }
     } else if (irState.irEnd) { // it reached the end or cross
-      stepForward(); // confirm which one
+      stepForward();            // confirm which one
       forward(0, 0);
       irScan();
       irState = detectPostion();
@@ -277,20 +276,20 @@ char turn;
         followDirection(
             path[stepCount]); // turn according to plan, even if wrong!
         stepCount++;
-        //buzzer();
-      } else { // it reached the end 
+        // buzzer();
+      } else { // it reached the end
         ready = false;
         forward(0, 0);
-        //buzzer();
+        // buzzer();
       }
     } else if (irState.irDeadEnd) {
       // uTurn(UTURN_DIR);
       // something bad
       forward(0, 0);
-      //buzzer();
+      // buzzer();
     } else { // worst case scenario when it doesn't find a line
       // left(TURNING_SPEED, TURNING_SPEED); // rotate till death
-      //buzzer();
+      // buzzer();
       forward(0, 0); // stop
     }
   }

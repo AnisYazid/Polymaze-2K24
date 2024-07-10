@@ -34,7 +34,7 @@ void ARDUINO_ISR_ATTR onTimerISR() {
 }
 
 void buzzer(int buzz_times = 1) {
-  if(noRunningBuzzer) {
+  if (noRunningBuzzer) {
     buzzingTimes = 2 * buzz_times - 1;
     noRunningBuzzer = false;
     buzzerTimer = timerBegin(TIMER_BASE); // Use timer wtih 1MHz frequency

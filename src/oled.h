@@ -83,11 +83,6 @@ void oledMenuControl(bool buttonup, bool buttondown, bool buttonOk) {
   }
 }
 
-
-
-
-
-
 void displayPrisonBreak() {
   // Draw the text "PRISON BREAK" centered on the display, with alternating
   // colors and flashing
@@ -112,14 +107,10 @@ void displayPrisonBreak() {
   display.setTextSize(1);
 }
 
-
-
-
-
 int currentMenuIndex2 = 0;
 const int menuItems2 = 1;
 
-String menu2[menuItems2] = { "Final Ready!"};
+String menu2[menuItems2] = {"Final Ready!"};
 
 void displayMenu2() {
   display.clearDisplay();

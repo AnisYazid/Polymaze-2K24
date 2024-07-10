@@ -13,7 +13,7 @@
 #define upButton 99
 #define downButton 5
 
-#define irFrontPin 18 // digital
+#define irFrontPin 19 // digital
 #define irLeftPin 2   // analog
 #define irRightPin 27 // analog
 

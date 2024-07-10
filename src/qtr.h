@@ -17,8 +17,7 @@ ESP32QTRSensors qtr;
 
 void setupQTR() {
   qtr.setTypeAnalog();
-  qtr.setSensorPins(irSensorPins,
-                    SensorCount);
+  qtr.setSensorPins(irSensorPins, SensorCount);
 }
 
 uint16_t sensorValues[SensorCount];
@@ -48,6 +47,29 @@ typedef struct {
   bool irDeadEnd;
 } IRState;
 
+void printIRState(IRState ir_state) {
+  Serial.print("irFull: ");
+  Serial.println(ir_state.irFull);
+  Serial.print("irLeft: ");
+  Serial.println(ir_state.irLeft);
+  Serial.print("irMid: ");
+  Serial.println(ir_state.irMid);
+  Serial.print("irRight: ");
+  Serial.println(ir_state.irRight);
+  Serial.print("irNothing: ");
+  Serial.println(ir_state.irNothing);
+  Serial.print("irFront: ");
+  Serial.println(ir_state.irFront);
+  Serial.print("irRightMost: ");
+  Serial.println(ir_state.irRightMost);
+  Serial.print("irLeftMost: ");
+  Serial.println(ir_state.irLeftMost);
+  Serial.print("irEnd: ");
+  Serial.println(ir_state.irEnd);
+  Serial.print("irDeadEnd: ");
+  Serial.println(ir_state.irDeadEnd);
+}
+
 void irScan() {
   frontReading = digitalRead(irFrontpin);
   rightReading = analogRead(irRightPin);
@@ -66,11 +88,11 @@ IRState detectPostion() {
   uint16_t sensorState = 0;
 
   // Define the bitmasks for the different IR sensor states
-  const uint16_t IR_FULL_MASK = 0b11111111;
+  const uint16_t IR_FULL_MASK = 0b01111110;
   const uint16_t IR_LEFT_MASK = 0b11000000;
   // const uint16_t IR_MID_MASK     = 0b00011000;
   const uint16_t IR_RIGHT_MASK = 0b00000011;
-  const uint16_t IR_NOTHING_MASK = 0b00000000;
+  const uint16_t IR_NOTHING_MASK = 0b00000000; // is inverted, checks for 0s
 
   // Combine the sensor values into a single var
   for (int i = 0; i < SensorCount; i++) {
@@ -80,17 +102,19 @@ IRState detectPostion() {
   // check for qtr states
   if ((sensorState & IR_FULL_MASK) == IR_FULL_MASK) {
     state.irFull = true;
-  } else if ((sensorState & IR_LEFT_MASK) == IR_LEFT_MASK) {
+  } 
+  if ((sensorState & IR_LEFT_MASK) == IR_LEFT_MASK) {
     state.irLeft = true;
-    //} else if ((sensorState & IR_MID_MASK) == IR_MID_MASK){
-    //  state.irMid = true;
-  } else if ((sensorState & !IR_LEFT_MASK) &
-             (sensorState &
-              !IR_RIGHT_MASK)) { // check for not left and right WIP
-    state.irMid = true;
-  } else if ((sensorState & IR_RIGHT_MASK) == IR_RIGHT_MASK) {
+  } 
+  if ((sensorState & IR_RIGHT_MASK) == IR_RIGHT_MASK) {
     state.irRight = true;
-  } else if ((sensorState & IR_NOTHING_MASK) == IR_NOTHING_MASK) {
+  } 
+  if ((sensorState & !IR_LEFT_MASK) &
+             (sensorState & !IR_RIGHT_MASK)) { 
+    // check for not left and right WIP
+    state.irMid = true;
+  }
+  if ((!sensorState & !IR_NOTHING_MASK) == !IR_NOTHING_MASK) {
     state.irNothing = true;
   }
 

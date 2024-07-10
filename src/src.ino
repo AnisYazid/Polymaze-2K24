@@ -1,5 +1,6 @@
 #include "algo.h"
 #include "buzzer.h"
+#include "main2.h"
 #include "motors.h"
 #include "oled.h"
 #include "pid.h"
@@ -12,22 +13,22 @@ const int TURNING_SPEED = 150; // speed that it turns with
 const int TURNING_TIME = 1500; // time to turn
 const int UTURN_TIME = 3000;   // time to uturn
 const bool UTURN_DIR = go_right;
-const int DEADEND_TIME = 1000; // time to uturn at dead end
+// const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
 const int MOTOR_SPEED1 = 150;
 const int MOTOR_SPEED2 = 150;
 
 const bool WALL_FOLLOWING_DIR = go_right;
 
-bool discovered = false;
-bool ready = false;
+// bool discovered = false;
+// bool ready = false;
 
 char path[100];
 int pathLength = 0;
 
 IRState irState = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-bool btnUp = false;
-bool btnDown = false;
-bool btnOk = false;
+// bool btnUp = false;
+// bool btnDown = false;
+// bool btnOk = false;
 
 void setup() {
   // motor setup
@@ -43,17 +44,13 @@ void setup() {
   //}
   setupQTR();
   // extra ir sensors
-  pinMode(irRightPin, INPUT_PULLUP);
-  pinMode(irLeftPin, INPUT_PULLUP);
-  pinMode(irFrontPin, INPUT_PULLUP);
-  // tcs setup
-  setupTCS();
+  pinMode(irRightPin, INPUT);
+  pinMode(irLeftPin, INPUT);
+  pinMode(irFrontPin, INPUT);
   // buzzer setup
   pinMode(buzzerPin, OUTPUT);
-  // button setup
-  pinMode(okButton, INPUT);
-  pinMode(upButton, INPUT);
-  pinMode(downButton, INPUT);
+  // main2 setup
+  setupMain2();
 
   // start calibration
   buzzer();
@@ -65,35 +62,14 @@ void setup() {
   // indicate the beginning of the end
   buzzer(2);
 
-  // setup oled
-  setupOLED();
+  // start main2 task loop
+  startMain2();
 }
 
 void loop() {
   // lineFollow();
   // wallFollow();
   smartTurn();
-  oledPrintBars();
-  // readButtons();
-  // oledMenu(btnUp, btnDown, btnOk);
-  // btnUp = false;
-  // btnDown = false;
-  // btnOk = false;
-}
-
-void readButtons() {
-  if (digitalRead(okButton) == HIGH) {
-    buzzer();
-    btnOk = true;
-  }
-  if (digitalRead(upButton) == HIGH) {
-    buzzer();
-    btnUp = true;
-  }
-  if (digitalRead(downButton) == HIGH) {
-    buzzer();
-    btnDown = true;
-  }
 }
 
 void turnRight() {
@@ -121,57 +97,58 @@ char wallFollow() {
   irState = detectPostion();
   char turn = 'F'; // default direction
 
-  if (!irState.irNothing && !irState.irEnd &&
-      !irState.irDeadEnd) { // checks for line existance and not the end
-    if (!(irState.irRight || irState.irLeft)) { // no intersections
-      pidControl(position);                     // calculate correction speed
-      setMotors(motorspeeda, motorspeedb);      // apply correction speed
-      // forward(MOTOR_SPEED1,MOTOR_SPEED2);
-    }
+  if (irState.irEnd) {
+    forward(0, 0);
+    buzzer(3);
+    return 'E';
+  } else if (irState.irDeadEnd) {
+    uTurn(UTURN_DIR);
+    return 'B';
+  } else if (irState.irNothing) { // panic! no line detected
+    buzzer();
+    forward(0, 0);
+    // return 'E';
+  } else if (!(irState.irRight || irState.irLeft) &&
+             irState.irMid) {            // no intersections
+    pidControl(position);                // calculate correction speed
+    setMotors(motorspeeda, motorspeedb); // apply correction speed
+    return 'F';
+  } else if (irState.irRight || irState.irLeft || irState.irFront) {
+    // intersection or turn
+    if (WALL_FOLLOWING_DIR) { // follow right wall
+      if (irState.irRight) {  // turn right if there is a right turn
+        turnRight();
+        return 'R';
+      } else if (irState.irFront) {          // follow the line
+        pidControl(position);                // calculate correction speed
+        setMotors(motorspeeda, motorspeedb); // apply correction speed
+        return 'S';
+      } else if (irState.irLeft) { // there is only left turn
+        turnLeft();
+        return 'L';
+      }
 
-    // follow right wall or left wall
-    else {                      // intersection or turn
-      if (WALL_FOLLOWING_DIR) { // follow right wall
-        if (irState.irRight) {  // turn right if there is a right turn
-          turnRight();
-          turn = 'R';
-        } else if (irState.irFront) {          // follow the line
-          pidControl(position);                // calculate correction speed
-          setMotors(motorspeeda, motorspeedb); // apply correction speed
-          turn = 'S';
-        } else if (irState.irLeft) { // there is only left turn
-          turnLeft();
-          turn = 'L';
-        }
-
-      } else {                // follow left wall
-        if (irState.irLeft) { // turn left if there is a left turn
-          turnLeft();
-          turn = 'L';
-        } else if (irState.irFront) {          // follow the line
-          pidControl(position);                // calculate correction speed
-          setMotors(motorspeeda, motorspeedb); // apply correction speed
-          turn = 'S';
-        } else if (irState.irRight) { // there is only right turn
-          turnRight();
-          turn = 'R';
-        }
+    } else {                // follow left wall
+      if (irState.irLeft) { // turn left if there is a left turn
+        turnLeft();
+        return 'L';
+      } else if (irState.irFront) {          // follow the line
+        pidControl(position);                // calculate correction speed
+        setMotors(motorspeeda, motorspeedb); // apply correction speed
+        return 'S';
+      } else if (irState.irRight) { // there is only right turn
+        turnRight();
+        return 'R';
       }
     }
-  } else if (irState.irDeadEnd) {
-    setMotors(TURNING_SPEED, -TURNING_SPEED);
-    delay(DEADEND_TIME);
-    turn = 'B';
-  } else if (irState.irEnd) { // end of the maze
-    forward(0, 0);
-    buzzer();
-    turn = 'E';
-  } else { // worst case scenario when it doesn't find a line
-    // left(TURNING_SPEED, TURNING_SPEED); // rotate till death
-    buzzer();
-    forward(0, 0); // stop
   }
-  return turn; // the direction it turned
+  else { // panic! no logic for situation
+    buzzer();
+    forward(0, 0);
+    printIRState(irState);
+
+    // return turn; // the direction it turned
+  }
 }
 
 void lineFollow() {
@@ -189,10 +166,14 @@ void lineFollow() {
 
 void smartTurn() {
   char turn;
+  int stepCount = 0;
+  bool hasOptimized = false;
 
-  if (!ready) { // wait for the button to be pressed
+  if (!discovered && !ready) { // wait for the button to be pressed
     if (digitalRead(okButton) == HIGH) {
       ready = true;
+      buzzer();
+      delay(500);
     }
   } else if (!discovered && ready) { // discovering the maze
     irScan();
@@ -208,16 +189,45 @@ void smartTurn() {
       forward(0, 0);
       buzzer();
     }
+  } else if (discovered && !ready) {
+    if (!hasOptimized) {
+      optimizePath(path, &pathLength, WALL_FOLLOWING_DIR);
+      hasOptimized = true;
+      buzzer();
+    } else {
+      if (digitalRead(okButton) == HIGH) {
+        ready = true;
+      }
+    }
+
   } else if (discovered && ready) { // solving the maze
     irScan();
     irState = detectPostion();
 
-    if (!irState.irEnd) { // if it didn't reach the end
-      followDirection(turn);
-    } else { // it reached the end
+    if (!irState.irNothing && !irState.irEnd &&
+        !irState.irDeadEnd) { // checks for line existance and not the end
+      if (!(irState.irRight || irState.irLeft)) { // no intersections
+        pidControl(position);                     // calculate correction speed
+        setMotors(motorspeeda, motorspeedb);      // apply correction speed
+        // forward(MOTOR_SPEED1,MOTOR_SPEED2);
+      } else if (stepCount <= pathLength) { // found an intersection
+        followDirection(
+            path[stepCount]); // turn according to plan, even if wrong!
+        stepCount++;
+      }
+    } else if (!irState.irEnd) { // it reached the end
       ready = false;
       forward(0, 0);
       buzzer();
+    } else if (irState.irDeadEnd) {
+      // uTurn(UTURN_DIR);
+      // something bad
+      forward(0, 0);
+      buzzer();
+    } else { // worst case scenario when it doesn't find a line
+      // left(TURNING_SPEED, TURNING_SPEED); // rotate till death
+      buzzer();
+      forward(0, 0); // stop
     }
   }
 }

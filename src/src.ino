@@ -162,6 +162,10 @@ void lineFollow() {
   } else {
     pidControl(position);
     setMotors(motorspeeda, motorspeedb); // apply correction speed
+    Serial.print("speeda: ");
+    Serial.println(motorspeeda);
+    Serial.print(" speedb: ");
+    Serial.println(motorspeedb);
   }
 }
 

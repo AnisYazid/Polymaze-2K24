@@ -3,10 +3,10 @@
 // #include "main2.h"
 #include "main2alt.h"
 #include "motors.h"
-#include "oled.h"
+//#include "oled.h"
 #include "pid.h"
 #include "qtr.h"
-#include "tcs.h"
+// #include "tcs.h"
 
 enum directionCheck { go_left, go_right }; // left == 0, right == 1
 
@@ -16,7 +16,7 @@ const int UTURN_TIME = 3000;   // time to uturn
 const bool UTURN_DIR = go_right;
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
 const int STEP_SPEED = 150; // speed to step forward
-const int STEP_TIME = 500;  // time to step forward
+const int STEP_TIME = 300;  // time to step forward
 const int MOTOR_SPEED1 = 150;
 const int MOTOR_SPEED2 = 150;
 
@@ -62,27 +62,9 @@ void setup() {
 }
 
 void loop() {
-  lineFollow();
-  // wallFollow();
+  // lineFollow();
+  wallFollow();
   // smartTurn();
-}
-
-void turnRight() {
-  while (digitalRead(irFrontPin) == HIGH) {
-    right(TURNING_SPEED, TURNING_SPEED);
-    delay(100);
-  }
-  // right(TURNING_SPEED, TURNING_SPEED);
-  // delay(TURNING_TIME);
-}
-
-void turnLeft() {
-  while (digitalRead(irFrontPin) == HIGH) {
-    left(TURNING_SPEED, TURNING_SPEED);
-    delay(100);
-  }
-  // left(TURNING_SPEED, TURNING_SPEED);
-  // delay(TURNING_TIME);
 }
 
 void stepForward() {
@@ -94,6 +76,27 @@ void stepBackward() {
   delay(STEP_TIME);
 }
 
+void turnRight(bool doStep = true) {
+  if (doStep) stepForward();
+  while (digitalRead(irFrontPin) == HIGH) {
+    right(TURNING_SPEED, TURNING_SPEED);
+    delay(50);
+  }
+  // right(TURNING_SPEED, TURNING_SPEED);
+  // delay(TURNING_TIME);
+}
+
+void turnLeft(bool doStep = true) {
+  if (doStep) stepForward();
+  while (digitalRead(irFrontPin) == HIGH) {
+    left(TURNING_SPEED, TURNING_SPEED);
+    delay(50);
+  }
+  // left(TURNING_SPEED, TURNING_SPEED);
+  // delay(TURNING_TIME);
+}
+
+
 void uTurn(bool direction = UTURN_DIR) {
   if (direction == go_right) {
     right(TURNING_SPEED, TURNING_SPEED);
@@ -102,6 +105,18 @@ void uTurn(bool direction = UTURN_DIR) {
   }
   delay(UTURN_TIME);
 }
+
+void followDirection(char turn, bool doStep = true) { // placeholder please change
+  if (irState.irRight || irState.irLeft || irState.irFront) {
+  } else if (turn == 'R') {
+    turnRight(doStep);
+  } else if (turn == 'L') {
+    turnLeft(doStep);
+  } else if (turn == 'B') {
+    uTurn(); // should not be called
+  }
+}
+
 
 char wallFollow() {
   irScan();
@@ -114,31 +129,31 @@ char wallFollow() {
     irScan();
     irState = detectPostion();
     if (!irState.irEnd) { // this is a cross
-      stepBackward();
+      // stepBackward();
       //******** this is a copy
       if (WALL_FOLLOWING_DIR) { // follow right wall
         if (irState.irRight) {  // turn right if there is a right turn
-          turnRight();
+          turnRight(false);
           return 'R';
         } else if (irState.irFront) {          // follow the line
           pidControl(position);                // calculate correction speed
           setMotors(motorspeeda, motorspeedb); // apply correction speed
           return 'S';
         } else if (irState.irLeft) { // there is only left turn
-          turnLeft();
+          turnLeft(false);
           return 'L';
         }
 
       } else {                // follow left wall
         if (irState.irLeft) { // turn left if there is a left turn
-          turnLeft();
+          turnLeft(false);
           return 'L';
         } else if (irState.irFront) {          // follow the line
           pidControl(position);                // calculate correction speed
           setMotors(motorspeeda, motorspeedb); // apply correction speed
           return 'S';
         } else if (irState.irRight) { // there is only right turn
-          turnRight();
+          turnRight(false);
           return 'R';
         }
       }
@@ -272,9 +287,9 @@ void smartTurn() {
       irScan();
       irState = detectPostion();
       if (!irState.irEnd) { // this is a cross
-        stepBackward();
+        // stepBackward();
         followDirection(
-            path[stepCount]); // turn according to plan, even if wrong!
+            path[stepCount], false); // turn according to plan, even if wrong!
         stepCount++;
         // buzzer();
       } else { // it reached the end
@@ -295,13 +310,3 @@ void smartTurn() {
   }
 }
 
-void followDirection(char turn) { // placeholder please change
-  if (irState.irRight || irState.irLeft || irState.irFront) {
-  } else if (turn == 'R') {
-    turnRight();
-  } else if (turn == 'L') {
-    turnLeft();
-  } else if (turn == 'B') {
-    uTurn();
-  }
-}

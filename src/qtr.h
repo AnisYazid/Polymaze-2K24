@@ -37,8 +37,7 @@ float position;
 float readsum;
 const int leftbound = 3100;  // 3000;
 const int rightbound = 3800; // 4000;
-const int thres =
-    700; // threshhold value, max sensor reading is 4095 converted to 1000
+const int thres = 2800; // threshhold value, max sensor reading is 4095 
 int frontReading = 0;
 
 typedef struct {

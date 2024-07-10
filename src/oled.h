@@ -20,7 +20,7 @@ void oledPrintBars() {
   display.clearDisplay();
   // Draw the gauge for each sensor
   for (uint8_t i = 0; i < SensorCount; i++) {
-    int16_t gaugeHeight = map(sensorValues[i], 0, 1023, 0, SCREEN_HEIGHT - 8);
+    int16_t gaugeHeight = map(sensorValues[i], 0, 4096, 0, SCREEN_HEIGHT - 8);
     display.drawRect(i * 16, SCREEN_HEIGHT - 8, 12, 8, SSD1306_WHITE);
     display.fillRect(i * 16 + 2, SCREEN_HEIGHT - 8 - gaugeHeight, 8,
                      gaugeHeight, SSD1306_WHITE);

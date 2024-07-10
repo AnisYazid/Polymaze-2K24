@@ -17,16 +17,24 @@ protected:
 ESP32QTRSensors qtr;
 */
 
-QTRSensors qtr;
+//QTRSensors qtr;
 
 void setupQTR() {
-  qtr.setTypeAnalog();
-  qtr.setSensorPins(irSensorPins, SensorCount);
+  // qtr.setTypeAnalog();
+  // qtr.setSensorPins(irSensorPins, SensorCount);
+  for (int i = 0; i < SensorCount; i++) {
+    pinMode(irSensorPins[i], INPUT);
+  }
+
+  // extra ir sensors
+  pinMode(irFrontPin, INPUT);
 }
 
 uint16_t sensorValues[SensorCount];
 uint16_t avgsensorValues[SensorCount][5];
-uint16_t position;
+//uint16_t position;
+float position;
+float readsum;
 const int leftbound = 3100;  // 3000;
 const int rightbound = 3800; // 4000;
 const int thres = 700;      // threshhold value, max sensor reading is 4095 converted to 1000
@@ -69,9 +77,39 @@ void printIRState(IRState ir_state) {
 }
 
 void irScan() {
+  // Read each sensor 5 times and store the readings in an array
+  for (int j = 0; j < 5; j++) {
+    for (int i = 0; i < SensorCount; i++) {
+      avgsensorValues[i][j] = analogRead(irSensorPins[i]);
+    }
+  }
+
+  // Calculate the average value for each sensor
+  for (int i = 0; i < SensorCount; i++) {
+    int sum = 0;
+    for (int j = 0; j < 5; j++) {
+      sum += avgsensorValues[i][j];
+    }
+    sensorValues[i] = sum / 5;
+  }
+  // resets vars
+  position = 0;
+  readsum = 0;
+  int i;
+
+  // calculating weighted average
+  for (i = 0; i < SensorCount; i++) {
+    position += i * 1000 * sensorValues[i];
+    readsum += sensorValues[i];
+  }
+
+  if (readsum > 0) {
+    position = position / readsum;
+  }
+
   frontReading = digitalRead(irFrontPin);
 
-  position = qtr.readLineBlack(sensorValues);
+  // position = qtr.readLineBlack(sensorValues);
   // qtr.read(sensorValues);
 
   // value is between 0 and 7000

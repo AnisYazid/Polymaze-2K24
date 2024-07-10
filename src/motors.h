@@ -1,5 +1,14 @@
 #include "pins.h"
 
+void setupMotors() {
+  pinMode(motor1, OUTPUT);
+  pinMode(motor2, OUTPUT);
+  pinMode(motor3, OUTPUT);
+  pinMode(motor4, OUTPUT);
+  pinMode(motor1Speed, OUTPUT);
+  pinMode(motor2Speed, OUTPUT);
+}
+
 void back(int speed1, int speed2) {
   digitalWrite(motor1, 0);
   digitalWrite(motor2, 1);

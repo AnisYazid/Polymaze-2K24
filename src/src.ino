@@ -14,6 +14,8 @@ const int TURNING_TIME = 1500; // time to turn
 const int UTURN_TIME = 3000;   // time to uturn
 const bool UTURN_DIR = go_right;
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
+const int STEP_SPEED = 150; // speed to step forward
+const int STEP_TIME = 500; // time to step forward
 const int MOTOR_SPEED1 = 150;
 const int MOTOR_SPEED2 = 150;
 
@@ -33,38 +35,22 @@ IRState irState = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 void setup() {
   Serial.begin(9600);
   // motor setup
-  pinMode(motor1, OUTPUT);
-  pinMode(motor2, OUTPUT);
-  pinMode(motor3, OUTPUT);
-  pinMode(motor4, OUTPUT);
-  pinMode(motor1Speed, OUTPUT);
-  pinMode(motor2Speed, OUTPUT);
+  setupMotors();
   // qtr setup
-  // for (int i = 0; i < SensorCount; i++) {
-  // pinMode(irSensorPins[i], INPUT);
-  //}
   setupQTR();
-  // extra ir sensors
-  pinMode(irRightPin, INPUT);
-  pinMode(irLeftPin, INPUT);
-  pinMode(irFrontPin, INPUT);
   // buzzer setup
   pinMode(buzzerPin, OUTPUT);
+
   // main2 setup
   //setupMain2();
 
-  // start calibration
-  //buzzer();
-  for (uint16_t i = 0; i < 400; i++) {
-    qtr.calibrate();
-  }
-  Serial.print("finished cal");
-
-  // indicate the beginning of the end
-  //buzzer(2);
-
   // start main2 task loop
   //startMain2();
+
+  // indicate the beginning of the end
+  digitalWrite(buzzerPin, HIGH);
+  delay(500);
+  digitalWrite(buzzerPin, LOW);
 }
 
 void loop() {
@@ -74,13 +60,30 @@ void loop() {
 }
 
 void turnRight() {
-  right(TURNING_SPEED, TURNING_SPEED);
-  delay(TURNING_TIME);
+  while(digitalRead(irFrontPin) == HIGH) {
+    right(TURNING_SPEED, TURNING_SPEED);
+    delay(100);
+  }
+  // right(TURNING_SPEED, TURNING_SPEED);
+  // delay(TURNING_TIME);
 }
 
 void turnLeft() {
-  left(TURNING_SPEED, TURNING_SPEED);
-  delay(TURNING_TIME);
+  while(digitalRead(irFrontPin) == HIGH) {
+    left(TURNING_SPEED, TURNING_SPEED);
+    delay(100);
+  }
+  // left(TURNING_SPEED, TURNING_SPEED);
+  // delay(TURNING_TIME);
+}
+
+void stepForward() {
+  forward(STEP_SPEED, STEP_SPEED);
+  delay(STEP_TIME);
+}
+void stepBackward() {
+  back(STEP_SPEED, STEP_SPEED);
+  delay(STEP_TIME);
 }
 
 void uTurn(bool direction = UTURN_DIR) {
@@ -93,15 +96,50 @@ void uTurn(bool direction = UTURN_DIR) {
 }
 
 char wallFollow() {
-  // this should be enough for line following
   irScan();
   irState = detectPostion();
   char turn = 'F'; // default direction
 
-  if (irState.irEnd) {
-    forward(0, 0);
-    //buzzer(3);
-    return 'E';
+  if (irState.irEnd) { // either end or cross
+    stepForward();
+    forward(0,0);
+    irScan();
+    irState = detectPostion();
+    if (!irState.irEnd){ // this is a cross
+      stepBackward();
+      //******** this is a copy
+      if (WALL_FOLLOWING_DIR) { // follow right wall
+        if (irState.irRight) {  // turn right if there is a right turn
+          turnRight();
+          return 'R';
+        } else if (irState.irFront) {          // follow the line
+          pidControl(position);                // calculate correction speed
+          setMotors(motorspeeda, motorspeedb); // apply correction speed
+          return 'S';
+        } else if (irState.irLeft) { // there is only left turn
+          turnLeft();
+          return 'L';
+        }
+
+      } else {                // follow left wall
+        if (irState.irLeft) { // turn left if there is a left turn
+          turnLeft();
+          return 'L';
+        } else if (irState.irFront) {          // follow the line
+          pidControl(position);                // calculate correction speed
+          setMotors(motorspeeda, motorspeedb); // apply correction speed
+          return 'S';
+        } else if (irState.irRight) { // there is only right turn
+          turnRight();
+          return 'R';
+        }
+      }
+      //******** this is a copy
+    } else{ // the end
+      forward(0, 0);
+      //buzzer(3);
+      return 'E';
+    }
   } else if (irState.irDeadEnd) {
     uTurn(UTURN_DIR);
     return 'B';
@@ -109,13 +147,15 @@ char wallFollow() {
     //buzzer();
     forward(0, 0);
     // return 'E';
-  } else if (!(irState.irRight || irState.irLeft) &&
+    return 'X';
+  } else if (!(irState.irRight || irState.irLeft) && 
              irState.irMid) {            // no intersections
     pidControl(position);                // calculate correction speed
     setMotors(motorspeeda, motorspeedb); // apply correction speed
     return 'F';
   } else if (irState.irRight || irState.irLeft || irState.irFront) {
     // intersection or turn
+    //******** this is a copy
     if (WALL_FOLLOWING_DIR) { // follow right wall
       if (irState.irRight) {  // turn right if there is a right turn
         turnRight();
@@ -141,14 +181,15 @@ char wallFollow() {
         turnRight();
         return 'R';
       }
+      //******** this is a copy
     }
   }
   else { // panic! no logic for situation
     //buzzer();
     forward(0, 0);
     printIRState(irState);
-
     // return turn; // the direction it turned
+    return 'X';
   }
 }
 
@@ -169,10 +210,10 @@ void lineFollow() {
   }
 }
 
+int stepCount = 0;
+bool hasOptimized = false;
 void smartTurn() {
-  char turn;
-  int stepCount = 0;
-  bool hasOptimized = false;
+char turn;
 
   if (!discovered && !ready) { // wait for the button to be pressed
     if (digitalRead(okButton) == HIGH) {
@@ -181,13 +222,11 @@ void smartTurn() {
       delay(500);
     }
   } else if (!discovered && ready) { // discovering the maze
-    irScan();
-    irState = detectPostion();
     turn =
         wallFollow(); // turn accordingly and return the direction if it turned
 
     if (turn != 'E') { // if it didn't reach the end
-      markDirection(turn, path, &pathLength);
+      markDirection(turn, path, &pathLength); // marks and increments
     } else { // it reached the end
       discovered = true;
       ready = false;
@@ -220,10 +259,22 @@ void smartTurn() {
             path[stepCount]); // turn according to plan, even if wrong!
         stepCount++;
       }
-    } else if (!irState.irEnd) { // it reached the end
-      ready = false;
+    } else if (irState.irEnd) { // it reached the end or cross
+      stepForward(); // confirm which one
       forward(0, 0);
-      //buzzer();
+      irScan();
+      irState = detectPostion();
+      if (!irState.irEnd) { // this is a cross
+        stepBackward();
+        followDirection(
+            path[stepCount]); // turn according to plan, even if wrong!
+        stepCount++;
+        //buzzer();
+      } else { // it reached the end 
+        ready = false;
+        forward(0, 0);
+        //buzzer();
+      }
     } else if (irState.irDeadEnd) {
       // uTurn(UTURN_DIR);
       // something bad

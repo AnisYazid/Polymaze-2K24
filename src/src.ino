@@ -1,5 +1,5 @@
 #include "algo.h"
-#include "buzzer.h"
+//#include "buzzer.h"
 //#include "main2.h"
 #include "motors.h"
 #include "oled.h"
@@ -54,14 +54,14 @@ void setup() {
   //setupMain2();
 
   // start calibration
-  buzzer();
+  //buzzer();
   for (uint16_t i = 0; i < 400; i++) {
     qtr.calibrate();
   }
   Serial.print("finished cal");
 
   // indicate the beginning of the end
-  buzzer(2);
+  //buzzer(2);
 
   // start main2 task loop
   //startMain2();
@@ -100,13 +100,13 @@ char wallFollow() {
 
   if (irState.irEnd) {
     forward(0, 0);
-    buzzer(3);
+    //buzzer(3);
     return 'E';
   } else if (irState.irDeadEnd) {
     uTurn(UTURN_DIR);
     return 'B';
   } else if (irState.irNothing) { // panic! no line detected
-    buzzer();
+    //buzzer();
     forward(0, 0);
     // return 'E';
   } else if (!(irState.irRight || irState.irLeft) &&
@@ -144,7 +144,7 @@ char wallFollow() {
     }
   }
   else { // panic! no logic for situation
-    buzzer();
+    //buzzer();
     forward(0, 0);
     printIRState(irState);
 
@@ -157,7 +157,7 @@ void lineFollow() {
   irState = detectPostion();
 
   if (irState.irNothing) {
-    buzzer();
+    //buzzer();
     forward(0, 0);
   } else {
     pidControl(position);
@@ -173,7 +173,7 @@ void smartTurn() {
   if (!discovered && !ready) { // wait for the button to be pressed
     if (digitalRead(okButton) == HIGH) {
       ready = true;
-      buzzer();
+      //buzzer();
       delay(500);
     }
   } else if (!discovered && ready) { // discovering the maze
@@ -188,13 +188,13 @@ void smartTurn() {
       discovered = true;
       ready = false;
       forward(0, 0);
-      buzzer();
+      //buzzer();
     }
   } else if (discovered && !ready) {
     if (!hasOptimized) {
       optimizePath(path, &pathLength, WALL_FOLLOWING_DIR);
       hasOptimized = true;
-      buzzer();
+      //buzzer();
     } else {
       if (digitalRead(okButton) == HIGH) {
         ready = true;
@@ -219,15 +219,15 @@ void smartTurn() {
     } else if (!irState.irEnd) { // it reached the end
       ready = false;
       forward(0, 0);
-      buzzer();
+      //buzzer();
     } else if (irState.irDeadEnd) {
       // uTurn(UTURN_DIR);
       // something bad
       forward(0, 0);
-      buzzer();
+      //buzzer();
     } else { // worst case scenario when it doesn't find a line
       // left(TURNING_SPEED, TURNING_SPEED); // rotate till death
-      buzzer();
+      //buzzer();
       forward(0, 0); // stop
     }
   }

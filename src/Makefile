@@ -15,12 +15,16 @@ all: compile upload
 
 .PHONY: compile
 compile:
-	@$(ARDUINO_CLI) compile --fqbn $(BOARD) $(SKETCH) --build-path $(BUILD_DIR)
+	@$(ARDUINO_CLI) compile --fqbn $(BOARD) $(SKETCH) # --build-path $(BUILD_DIR)
 
 .PHONY: upload
 upload:
-	@$(ARDUINO_CLI) upload -p $(PORT) --fqbn $(BOARD) $(SKETCH) -i $(BUILD_DIR)
+	@$(ARDUINO_CLI) upload -p $(PORT) --fqbn $(BOARD) $(SKETCH) # -i $(BUILD_DIR)
 
 .PHONY: clean
 clean:
 	@rm -rf $(BUILD_DIR)
+
+.PHONY: format
+format:
+	@clang-format -i $(SKETCH)/*.ino $(SKETCH)/*.h 

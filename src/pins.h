@@ -9,10 +9,15 @@
 #define motor1Speed 12 // right wheel speed
 #define motor2Speed 18 // left wheel speed
 
+#define okButton 27
+#define upButton 99
+#define downButton 5
+
+#define irFrontPin 18 // digital
+#define irLeftPin 2   // analog
+#define irRightPin 27 // analog
+
+#define redLedPin 2
+
 #define SensorCount 8
-const int irSensorPins[SensorCount] = {26, 25, 36, 39, 34, 35, 32, 33};
-
-
-#define redpin 5
-#define greenpin 17
-#define bluepin 16
+const uint8_t irSensorPins[SensorCount] = {26, 25, 36, 39, 34, 35, 32, 33};

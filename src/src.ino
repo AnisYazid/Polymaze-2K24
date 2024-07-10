@@ -63,13 +63,13 @@ void setup() {
   buzzer(2);
 
   // start main2 task loop
-  startMain2();
+  //startMain2();
 }
 
 void loop() {
-  // lineFollow();
+  lineFollow();
   // wallFollow();
-  smartTurn();
+  // smartTurn();
 }
 
 void turnRight() {

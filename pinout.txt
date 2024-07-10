@@ -16,16 +16,16 @@ adc     qtr6        = 35
 adc     qtr7        = 32 
 adc     qtr8        = 33 
 
-sda     color/MPU       = 21 
-sdc     color/MPU       = 22 
+sda     color/MPU   = 21 
+sdc     color/MPU   = 22 
 
-gpio 	irFront       = 19
-adc   irLeft        = 
-adc	  irRight       = 
+gpio 	irFront     = 19
+adc     irLeft      = 
+adc     irRight     = 
 
-gpio	okButton      = 27
-gpio 	downButton    = 5
+gpio	okButton    = 27
+gpio 	downButton  = 5
 
-gpio LED            = 2
+gpio    LED         = 2
 
 remaining safe to use: 17

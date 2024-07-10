@@ -10,6 +10,8 @@ bool isBuzzerActive = false;
 const uint64_t BUZZ_TIME = 1000000;  // 1s in microseconds
 const uint16_t BUZZ_FREQ = 1000;     // Hz
 const uint32_t TIMER_BASE = 1000000; // 1MHz
+bool noRunningBuzzer = true;
+uint8_t buzzingTimes = 0;
 
 void ARDUINO_ISR_ATTR onTimerISR() {
   if (isBuzzerActive) {
@@ -19,6 +21,11 @@ void ARDUINO_ISR_ATTR onTimerISR() {
     tone(buzzerPin, BUZZ_FREQ);
     isBuzzerActive = true;
   }
+  if (buzzingTimes > 0) {
+    buzzingTimes--;
+  } else {
+    noRunningBuzzer = true;
+  }
   // or ..
   // Set the buzzer pin to the appropriate state
   // digitalWrite(buzzerPin, isBuzzerActive ? LOW : HIGH);
@@ -27,18 +34,22 @@ void ARDUINO_ISR_ATTR onTimerISR() {
 }
 
 void buzzer(int buzz_times = 1) {
-  buzzerTimer = timerBegin(TIMER_BASE); // Use timer wtih 1MHz frequency
-  timerAttachInterrupt(buzzerTimer,
-                       &onTimerISR); // Attach the callback function
-  if (buzz_times <= 1) {
-    timerAlarm(buzzerTimer, BUZZ_TIME, false, 0); // Set the alarm once
-  } else {
-    timerAlarm(buzzerTimer, BUZZ_TIME, true,
-               2 * buzz_times - 1); // Set the alarm for multiple times
-  }
-  timerStart(buzzerTimer); // Start the alarm
+  if(noRunningBuzzer) {
+    buzzingTimes = 2 * buzz_times - 1;
+    noRunningBuzzer = false;
+    buzzerTimer = timerBegin(TIMER_BASE); // Use timer wtih 1MHz frequency
+    timerAttachInterrupt(buzzerTimer,
+                         &onTimerISR); // Attach the callback function
+    if (buzz_times <= 1) {
+      timerAlarm(buzzerTimer, BUZZ_TIME, false, 0); // Set the alarm once
+    } else {
+      timerAlarm(buzzerTimer, BUZZ_TIME, true,
+                 2 * buzz_times - 1); // Set the alarm for multiple times
+    }
+    timerStart(buzzerTimer); // Start the alarm
 
-  tone(buzzerPin, BUZZ_FREQ);
-  // digitalWrite(buzzerPin, HIGH);
-  isBuzzerActive = true;
+    tone(buzzerPin, BUZZ_FREQ);
+    // digitalWrite(buzzerPin, HIGH);
+    isBuzzerActive = true;
+  }
 }

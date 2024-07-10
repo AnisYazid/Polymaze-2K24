@@ -31,6 +31,7 @@ IRState irState = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 // bool btnOk = false;
 
 void setup() {
+  Serial.begin(9600);
   // motor setup
   pinMode(motor1, OUTPUT);
   pinMode(motor2, OUTPUT);

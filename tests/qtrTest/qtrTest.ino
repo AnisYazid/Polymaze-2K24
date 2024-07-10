@@ -8,7 +8,7 @@ void setup() {
 	for (int i = 0; i < SensorCount; i++) {
 		pinMode(irSensorPins[i], INPUT);
 	}
-	pinMode(irFrontpin, INPUT);
+	pinMode(irFrontPin, INPUT);
 	
 	//motor setup
 	pinMode(motor1, OUTPUT);
@@ -17,6 +17,14 @@ void setup() {
 	pinMode(motor2Speed, OUTPUT);
 	forward(0,0);
 	pinMode(buzzerPin, OUTPUT);
+	buzzer();
+	setupQTR();
+
+  for (uint16_t i = 0; i < 400; i++)
+  {
+    qtr.calibrate();
+  }
+	Serial.print("finished cal");
 	buzzer();
 }
 
@@ -33,8 +41,6 @@ void loop() {
 	Serial.println("");
 	Serial.print("position: ");
 	Serial.println(position);
-	Serial.print("readsum: ");
-	Serial.println(readsum);
 	Serial.print("irFull: ");
 	Serial.println(irstates.irFull);
 	Serial.print("irRight: ");

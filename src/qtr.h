@@ -2,6 +2,7 @@
 #include "pins.h"
 #include <QTRSensors.h>
 
+/*
 class ESP32QTRSensors : public QTRSensors {
 public:
   void setTypeAnalog() {
@@ -14,6 +15,9 @@ protected:
   uint16_t _maxValue = 4096;
 };
 ESP32QTRSensors qtr;
+*/
+
+QTRSensors qtr;
 
 void setupQTR() {
   qtr.setTypeAnalog();
@@ -23,16 +27,10 @@ void setupQTR() {
 uint16_t sensorValues[SensorCount];
 uint16_t avgsensorValues[SensorCount][5];
 uint16_t position;
-// float position;
-uint16_t readsum;
 const int leftbound = 3100;  // 3000;
 const int rightbound = 3800; // 4000;
-const int thres = 3000;      // threshhold value, max sensor reading is 4095
-const int irFrontpin = 27;
-const int thresSides = 2000; // threshold value for extra side sensors
+const int thres = 700;      // threshhold value, max sensor reading is 4095 converted to 1000
 int frontReading = 0;
-int rightReading = 0;
-int leftReading = 0;
 
 typedef struct {
   bool irFull;
@@ -71,27 +69,27 @@ void printIRState(IRState ir_state) {
 }
 
 void irScan() {
-  frontReading = digitalRead(irFrontpin);
-  rightReading = analogRead(irRightPin);
-  leftReading = analogRead(irLeftPin);
+  frontReading = digitalRead(irFrontPin);
 
   position = qtr.readLineBlack(sensorValues);
+  // qtr.read(sensorValues);
 
   // value is between 0 and 7000
   // 0 to the right, 1000 for each sensor
   // 7000 to the left
 }
 
+uint16_t sensorState = 0;
 IRState detectPostion() {
+  sensorState = 0;
   IRState state = {false, false, false, false, false,
                    false, false, false, false, false};
-  uint16_t sensorState = 0;
 
   // Define the bitmasks for the different IR sensor states
-  const uint16_t IR_FULL_MASK = 0b01111110;
-  const uint16_t IR_LEFT_MASK = 0b11000000;
-  // const uint16_t IR_MID_MASK     = 0b00011000;
-  const uint16_t IR_RIGHT_MASK = 0b00000011;
+  const uint16_t IR_FULL_MASK    = 0b01111110;
+  const uint16_t IR_LEFT_MASK    = 0b11000000;
+  const uint16_t IR_MID_MASK     = 0b00111100;
+  const uint16_t IR_RIGHT_MASK   = 0b00000011;
   const uint16_t IR_NOTHING_MASK = 0b00000000; // is inverted, checks for 0s
 
   // Combine the sensor values into a single var
@@ -109,9 +107,7 @@ IRState detectPostion() {
   if ((sensorState & IR_RIGHT_MASK) == IR_RIGHT_MASK) {
     state.irRight = true;
   } 
-  if ((sensorState & !IR_LEFT_MASK) &
-             (sensorState & !IR_RIGHT_MASK)) { 
-    // check for not left and right WIP
+  if ((sensorState & IR_MID_MASK)) {
     state.irMid = true;
   }
   if ((!sensorState & !IR_NOTHING_MASK) == !IR_NOTHING_MASK) {
@@ -122,17 +118,17 @@ IRState detectPostion() {
   if (frontReading) {
     state.irFront = true;
   }
-  if (rightReading >= thresSides) {
-    state.irRightMost = true;
-  }
-  if (leftReading >= thresSides) {
-    state.irLeftMost = true;
-  }
+  // if (rightReading >= thresSides) {
+  //   state.irRightMost = true;
+  // }
+  // if (leftReading >= thresSides) {
+  //   state.irLeftMost = true;
+  // }
 
   // check for extra conditions
   if (state.irFull && state.irFront && state.irLeft && state.irRight) {
     state.irEnd = true;
-  } else if (state.irMid && !state.irFront) {
+  } else if (state.irMid && !state.irFront && !state.irLeft && !state.irRight) {
     state.irDeadEnd = true;
   }
 

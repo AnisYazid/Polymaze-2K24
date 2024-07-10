@@ -30,7 +30,7 @@ const float upper_bounds[][3] = {
 
 // for outputs
 enum Colors { RED, BLUE, NO_COLOR };
-const int NUM_COLORS = Colors::NO_COLOR;
+const int NUM_COLORS = Colors::NO_COLOR + 1;
 Colors color;
 
 // detects the colors
@@ -39,9 +39,8 @@ void detectColor() {
   tcs.getRGB(&red, &green, &blue);
 
   // detecting the color
-  int i;
   color = NO_COLOR;
-  for (i = 0; i < NUM_COLORS; i++) {
+  for (int i = 0; i < NUM_COLORS; i++) {
     if (red >= lower_bounds[i][0] && red <= upper_bounds[i][0] &&
         green >= lower_bounds[i][1] && green <= upper_bounds[i][1] &&
         blue >= lower_bounds[i][2] && blue <= upper_bounds[i][2]) {

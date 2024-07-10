@@ -1,6 +1,7 @@
 #include "algo.h"
 //#include "buzzer.h"
 //#include "main2.h"
+#include "main2alt.h"
 #include "motors.h"
 #include "oled.h"
 #include "pid.h"
@@ -41,11 +42,18 @@ void setup() {
   // buzzer setup
   pinMode(buzzerPin, OUTPUT);
 
+  // button setup
+  pinMode(okButton, INPUT_PULLUP);
+  pinMode(upButton, INPUT_PULLUP);
+  pinMode(downButton, INPUT_PULLUP);
+  // led setup
+  pinMode(redLedPin, OUTPUT);
+
   // main2 setup
-  //setupMain2();
+  setupMain2();
 
   // start main2 task loop
-  //startMain2();
+  startMain2();
 
   // indicate the beginning of the end
   digitalWrite(buzzerPin, HIGH);

@@ -1,3 +1,4 @@
+#pragma once
 // based on the colorview example by adafruit
 #include "Adafruit_TCS34725.h"
 #include "pins.h"
@@ -53,10 +54,11 @@ void detectColor() {
 void colorAction() {
   switch (color) {
   case RED:
-    // do something
+    digitalWrite(redLedPin, HIGH);
     break;
   case BLUE:
-    // do something
+    digitalWrite(redLedPin, LOW);
+    displayPrisonBreak();
     break;
   default:
     // do something

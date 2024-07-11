@@ -141,6 +141,9 @@ char wallFollow() {
     irScan();
     irState = detectPostion();
     if (irState.irFull) {
+      digitalWrite(buzzerPin, HIGH);
+      delay(100);
+      digitalWrite(buzzerPin, LOW);
       // end
       forward(0, 0);
       return 'E';
@@ -154,9 +157,6 @@ char wallFollow() {
       }
     }
   } else if (irState.irMid && (irState.irRight || irState.irLeft)) {
-    digitalWrite(buzzerPin, HIGH);
-    delay(100);
-    digitalWrite(buzzerPin, LOW);
     if (irState.irRight && !irState.irLeft) { // right only
       if (WALL_FOLLOWING_DIR == go_right) {
         turnRight(); // turn right since it is a T

@@ -126,7 +126,7 @@ IRState detectPostion() {
                    false, false, false, false, false};
 
   // Define the bitmasks for the different IR sensor states
-  const uint16_t IR_FULL_MASK = 0b01111110;
+  const uint16_t IR_FULL_MASK = 0b00111100;
   const uint16_t IR_LEFT_MASK = 0b10000000;
   const uint16_t IR_MID_MASK = 0b00111100;
   const uint16_t IR_RIGHT_MASK = 0b00000001;

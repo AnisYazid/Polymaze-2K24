@@ -1,4 +1,3 @@
-#pragma once
 void markDirection(char direction, char *path, int *pathLength) {
   if (direction == 'L') {
     path[(*pathLength)++] = 'L';

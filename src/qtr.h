@@ -30,14 +30,15 @@ void setupQTR() {
   pinMode(irFrontPin, INPUT);
 }
 
+const int AVG_COUNT = 30;
 uint16_t sensorValues[SensorCount];
-uint16_t avgsensorValues[SensorCount][5];
+uint16_t avgsensorValues[SensorCount][AVG_COUNT];
 // uint16_t position;
 float position;
 float readsum;
 const int leftbound = 3100;  // 3000;
 const int rightbound = 3800; // 4000;
-const int thres = 2800; // threshhold value, max sensor reading is 4095 
+const int thres = 3000;      // threshhold value, max sensor reading is 4095
 int frontReading = 0;
 
 typedef struct {
@@ -78,10 +79,12 @@ void printIRState(IRState ir_state) {
 
 void irScan() {
   // Read each sensor 5 times and store the readings in an array
-  for (int j = 0; j < 5; j++) {
+  int frontSum = 0;
+  for (int j = 0; j < AVG_COUNT; j++) {
     for (int i = 0; i < SensorCount; i++) {
       avgsensorValues[i][j] = analogRead(irSensorPins[i]);
     }
+    frontSum += digitalRead(irFrontPin);
   }
 
   // Calculate the average value for each sensor
@@ -95,10 +98,9 @@ void irScan() {
   // resets vars
   position = 0;
   readsum = 0;
-  int i;
 
   // calculating weighted average
-  for (i = 0; i < SensorCount; i++) {
+  for (int i = 0; i < SensorCount; i++) {
     position += i * 1000 * sensorValues[i];
     readsum += sensorValues[i];
   }
@@ -107,7 +109,7 @@ void irScan() {
     position = position / readsum;
   }
 
-  frontReading = digitalRead(irFrontPin);
+  frontReading = frontSum / AVG_COUNT;
 
   // position = qtr.readLineBlack(sensorValues);
   // qtr.read(sensorValues);

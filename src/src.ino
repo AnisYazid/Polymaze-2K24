@@ -1,10 +1,9 @@
-#pragma once
 #include "algo.h"
 // #include "buzzer.h"
 // #include "main2.h"
 #include "main2alt.h"
 #include "motors.h"
-//#include "oled.h"
+// #include "oled.h"
 #include "pid.h"
 #include "qtr.h"
 // #include "tcs.h"
@@ -12,12 +11,14 @@
 enum directionCheck { go_left, go_right }; // left == 0, right == 1
 
 const int TURNING_SPEED = 80; // speed that it turns with
-//const int TURNING_TIME = 500; // time to turn
-const int UTURN_TIME = 1000;   // time to uturn
+const int TURNING_TIME = 350; // time to turn
+const int UTURN_TIME = 850;   // time to uturn
+
 const bool UTURN_DIR = go_right;
+
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
 const int STEP_SPEED = 80; // speed to step forward
-const int STEP_TIME = 200;  // time to step forward
+const int STEP_TIME = 90;  // time to step forward
 // const int MOTOR_SPEED1 = 150;
 // const int MOTOR_SPEED2 = 150;
 
@@ -35,8 +36,8 @@ IRState irState = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 // bool btnOk = false;
 
 void setup() {
-  Serial.begin(9600);
-  // motor setup
+  // Serial.begin(9600);
+  //  motor setup
   setupMotors();
   // qtr setup
   setupQTR();
@@ -62,11 +63,8 @@ void setup() {
   digitalWrite(buzzerPin, LOW);
 }
 
-
 void stepForward() {
-  // forward(STEP_SPEED, STEP_SPEED);
-  pidControl(position);                // calculate correction speed
-  setMotors(motorspeeda, motorspeedb); // apply correction speed
+  forward(STEP_SPEED, STEP_SPEED);
   delay(STEP_TIME);
 }
 // void stepBackward() {
@@ -75,39 +73,34 @@ void stepForward() {
 // }
 
 void turnRight(bool doStep = true) {
-  if (doStep) stepForward();
+  if (doStep)
+    stepForward();
   right(TURNING_SPEED, TURNING_SPEED);
-  delay(50);
-  while (digitalRead(irFrontPin) == LOW) {
-    right(TURNING_SPEED, TURNING_SPEED);
-    delay(50);
-  }
-  forward(0, 0);
-  delay(20);
-  for( int i = 0; i < 5; i++){
+  delay(TURNING_TIME);
+  for (int i; i < 50; i++) {
+    irScan();
     pidControl(position);
     setMotors(motorspeeda, motorspeedb);
   }
-  // right(TURNING_SPEED, TURNING_SPEED);
-  // delay(TURNING_TIME);
 }
 
+// right(TURNING_SPEED, TURNING_SPEED);
+// delay(TURNING_TIME);
+
 void turnLeft(bool doStep = true) {
-  if (doStep) stepForward();
+  if (doStep)
+    stepForward();
   left(TURNING_SPEED, TURNING_SPEED);
-  delay(50);
-  while (digitalRead(irFrontPin) == LOW) {
-    left(TURNING_SPEED, TURNING_SPEED);
-    delay(50);
+  delay(TURNING_TIME);
+  for (int i; i < 50; i++) {
+    irScan();
+    pidControl(position);
+    setMotors(motorspeeda, motorspeedb);
   }
-  forward(0, 0);
-  delay(20);
-  pidControl(position);
-  setMotors(motorspeeda, motorspeedb);
+
   // left(TURNING_SPEED, TURNING_SPEED);
   // delay(TURNING_TIME);
 }
-
 
 void uTurn(bool direction = UTURN_DIR) {
   if (direction == go_right) {
@@ -116,9 +109,15 @@ void uTurn(bool direction = UTURN_DIR) {
     left(TURNING_SPEED, TURNING_SPEED);
   }
   delay(UTURN_TIME);
+  for (int i; i < 50; i++) {
+    irScan();
+    pidControl(position);
+    setMotors(motorspeeda, motorspeedb);
+  }
 }
 
-void followDirection(char turn, bool doStep = true) { // placeholder please change
+void followDirection(char turn,
+                     bool doStep = true) { // placeholder please change
   if (irState.irRight || irState.irLeft || irState.irFront) {
   } else if (turn == 'R') {
     turnRight(doStep);
@@ -129,54 +128,79 @@ void followDirection(char turn, bool doStep = true) { // placeholder please chan
   }
 }
 
-
 char wallFollow() {
   irScan();
   irState = detectPostion();
-  printIRState(irState);
-
-  if (irState.irNothing){
+  // printIRState(irState);
+  if (irState.irNothing) {
     forward(0, 0); // deadend
-    turnRight(false); //u turn
+    uTurn();
     return 'B';
-  }
-  else if (irState.irFull){
+  } else if (irState.irFull) {
     stepForward();
     irScan();
     irState = detectPostion();
-    if (irState.irFull){
+    if (irState.irFull) {
       // end
       forward(0, 0);
       return 'E';
     } else {
-      if (WALL_FOLLOWING_DIR ==  go_right) { //right
-        turnRight(false); // turn right since it is a T
+      if (WALL_FOLLOWING_DIR == go_right) { // right
+        turnRight(false);                   // turn right since it is a T
         return 'R';
-      } else{ // left
+      } else { // left
         turnLeft(false);
         return 'L';
       }
     }
-  }
-  else if (irState.irMid && (irState.irRight || irState.irLeft)){
-    if (irState.irRight && !irState.irLeft){ // right only
-      turnRight(false); // turn right since it is a T
-      return 'R';
-    } else if (irState.irLeft && !irState.irRight){ // left only
-      turnLeft(false);
-      return 'L';
-    } else { // is both
-      if (WALL_FOLLOWING_DIR ==  go_right) { //right
-        turnRight(false); // turn right since it is a T
+  } else if (irState.irMid && (irState.irRight || irState.irLeft)) {
+    digitalWrite(buzzerPin, HIGH);
+    delay(100);
+    digitalWrite(buzzerPin, LOW);
+    if (irState.irRight && !irState.irLeft) { // right only
+      if (WALL_FOLLOWING_DIR == go_right) {
+        turnRight(); // turn right since it is a T
         return 'R';
-      } else{ // left
-        turnLeft(false);
+      } else { // left
+        stepForward();
+        irScan();
+        irState = detectPostion();
+        if (irState.irMid) {
+          pidControl(position);
+          setMotors(motorspeeda, motorspeedb);
+          return 'S';
+        } else {
+          turnRight(false);
+          return 'R';
+        }
+      }
+    } else if (irState.irLeft && !irState.irRight) { // left only
+      if (WALL_FOLLOWING_DIR == go_left) {
+        turnLeft();
+        return 'L';
+      } else { // priority right
+        stepForward();
+        irScan();
+        irState = detectPostion();
+        if (irState.irMid) {
+          pidControl(position);
+          setMotors(motorspeeda, motorspeedb);
+          return 'S';
+        } else {
+          turnLeft(false);
+          return 'L';
+        }
+      }
+    } else {                                // is both
+      if (WALL_FOLLOWING_DIR == go_right) { // right
+        turnRight(true);                    // turn right since it is a T
+        return 'R';
+      } else { // left
+        turnLeft(true);
         return 'L';
       }
-
     }
-  }
-  else if (irState.irMid && !(irState.irRight || irState.irLeft)){
+  } else if (irState.irMid && !(irState.irRight || irState.irLeft)) {
     pidControl(position);
     setMotors(motorspeeda, motorspeedb);
     return 'F';
@@ -256,8 +280,8 @@ void smartTurn() {
       irState = detectPostion();
       if (!irState.irEnd) { // this is a cross
         // stepBackward();
-        followDirection(
-            path[stepCount], false); // turn according to plan, even if wrong!
+        followDirection(path[stepCount],
+                        false); // turn according to plan, even if wrong!
         stepCount++;
         // buzzer();
       } else { // it reached the end
@@ -277,16 +301,18 @@ void smartTurn() {
     }
   }
 }
-
 void loop() {
   // lineFollow();
-  // wallFollow();
+  wallFollow();
   // smartTurn();
 
-  delay(1000);
-  turnRight();
-  delay(1000);
-  turnLeft();
-  delay(1000);
-  uTurn();
+  // delay(1000);
+  // turnRight();
+  // forward(0, 0);
+  // delay(1000);
+  // turnLeft();
+  // forward(0, 0);
+  // delay(1000);
+  // uTurn();
+  // forward(0, 0);
 }

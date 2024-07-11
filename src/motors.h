@@ -1,4 +1,3 @@
-#pragma once
 #include "pins.h"
 
 void setupMotors() {

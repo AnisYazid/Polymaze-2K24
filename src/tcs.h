@@ -57,7 +57,10 @@ void colorAction() {
     break;
   case BLUE:
     digitalWrite(redLedPin, LOW);
-    displayPrisonBreak();
+    //displayPrisonBreak();
+    digitalWrite(buzzerPin, HIGH);
+    delay(100);
+    digitalWrite(buzzerPin, LOW);
     break;
   default:
     // do something

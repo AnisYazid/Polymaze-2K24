@@ -89,7 +89,7 @@ void displayPrisonBreak() {
   int16_t x = display.width() / 2;
   int16_t y = display.height() / 2;
   for (int i = 0; i < 4; i++) {
-    display.setTextSize(2);
+    display.setTextSize(1);
     if (i % 2 == 0) {
       display.setTextColor(SSD1306_WHITE);
     } else {
@@ -99,10 +99,10 @@ void displayPrisonBreak() {
                       y - 8 / 2); // Adjust the x and y positions as needed
     display.println("PRISON BREAK");
     display.display();
-    delay(200); // Pause for 0.5 seconds
+    delay(500); // Pause for 0.5 seconds
     display.clearDisplay();
     display.display();
-    delay(200); // Pause for 0.5 seconds
+    delay(500); // Pause for 0.5 seconds
   }
   display.setTextSize(1);
 }

@@ -3,7 +3,7 @@
 // #include "main2.h"
 #include "main2alt.h"
 #include "motors.h"
-// #include "oled.h"
+#include "oled.h"
 #include "pid.h"
 #include "qtr.h"
 // #include "tcs.h"
@@ -50,6 +50,7 @@ void setup() {
   pinMode(downButton, INPUT_PULLUP);
   // led setup
   pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
 
   // main2 setup
   setupMain2();
@@ -303,7 +304,17 @@ void smartTurn() {
 }
 void loop() {
   // lineFollow();
-  wallFollow();
+  if (wallFollow() == 'E'){
+    forward(0, 0);
+    //vTaskDelete(main2Task);
+    while (1){ // celebration
+      isEnd = true;
+      digitalWrite(buzzerPin, HIGH);
+      delay(100);
+      digitalWrite(buzzerPin, LOW);
+      delay(1000);
+    }
+  }
   // smartTurn();
 
   // delay(1000);

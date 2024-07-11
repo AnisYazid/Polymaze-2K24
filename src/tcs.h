@@ -2,6 +2,7 @@
 // based on the colorview example by adafruit
 #include "Adafruit_TCS34725.h"
 #include "pins.h"
+#include "oled.h"
 #include <Wire.h>
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725();

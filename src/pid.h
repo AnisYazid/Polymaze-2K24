@@ -1,3 +1,4 @@
+#pragma once
 float Kp = 0.7; // related to the proportional control term;
 // change the value by trial-and-error (ex: 0.07).
 float Ki = 0; // related to the integral control term;

@@ -1,3 +1,4 @@
+#pragma once
 #include "algo.h"
 // #include "buzzer.h"
 // #include "main2.h"
@@ -61,11 +62,6 @@ void setup() {
   digitalWrite(buzzerPin, LOW);
 }
 
-void loop() {
-  // lineFollow();
-  wallFollow();
-  // smartTurn();
-}
 
 void stepForward() {
   // forward(STEP_SPEED, STEP_SPEED);
@@ -88,6 +84,10 @@ void turnRight(bool doStep = true) {
   }
   forward(0, 0);
   delay(20);
+  for( int i = 0; i < 5; i++){
+    pidControl(position);
+    setMotors(motorspeeda, motorspeedb);
+  }
   // right(TURNING_SPEED, TURNING_SPEED);
   // delay(TURNING_TIME);
 }
@@ -102,6 +102,8 @@ void turnLeft(bool doStep = true) {
   }
   forward(0, 0);
   delay(20);
+  pidControl(position);
+  setMotors(motorspeeda, motorspeedb);
   // left(TURNING_SPEED, TURNING_SPEED);
   // delay(TURNING_TIME);
 }
@@ -131,6 +133,7 @@ void followDirection(char turn, bool doStep = true) { // placeholder please chan
 char wallFollow() {
   irScan();
   irState = detectPostion();
+  printIRState(irState);
 
   if (irState.irNothing){
     forward(0, 0); // deadend
@@ -275,3 +278,15 @@ void smartTurn() {
   }
 }
 
+void loop() {
+  // lineFollow();
+  // wallFollow();
+  // smartTurn();
+
+  delay(1000);
+  turnRight();
+  delay(1000);
+  turnLeft();
+  delay(1000);
+  uTurn();
+}

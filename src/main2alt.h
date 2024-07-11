@@ -1,3 +1,4 @@
+#pragma once
 #include "oled.h"
 #include "pins.h"
 #include "tcs.h"

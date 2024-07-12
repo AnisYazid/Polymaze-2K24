@@ -12,6 +12,7 @@ void setupTCS() {
   } else {
     Serial.println("No TCS34725 found ");
   }
+  pinMode(buzzerPin, OUTPUT);
 }
 
 // for sensor input
@@ -19,13 +20,12 @@ float red, green, blue;
 
 // color ranges
 const float lower_bounds[][3] = {
-    {115, 0, 0},  // red
-    {0, 60, 115}, // blue
+    {80, 0, 0},  // red
+    {0, 40, 80}, // blue
 };
-
 const float upper_bounds[][3] = {
     {255, 115, 115}, // red
-    {40, 115, 255},  // blue
+    {90, 115, 255},  // blue
 };
 
 // for outputs
@@ -54,12 +54,15 @@ void colorAction() {
   switch (color) {
   case RED:
     digitalWrite(redLedPin, HIGH);
+    digitalWrite(buzzerPin, HIGH);
+    delay(200);
+    digitalWrite(buzzerPin, LOW);
     break;
   case BLUE:
     digitalWrite(redLedPin, LOW);
     //displayPrisonBreak();
     digitalWrite(buzzerPin, HIGH);
-    delay(100);
+    delay(200);
     digitalWrite(buzzerPin, LOW);
     break;
   default:

@@ -15,6 +15,7 @@ const int TURNING_TIME = 350; // time to turn
 const int UTURN_TIME = 850;   // time to uturn
 
 const bool UTURN_DIR = go_right;
+// const bool UTURN_DIR = go_left;
 
 // const int DEADEND_TIME = 1000; // time to uturn at dead end// is uturn time
 const int STEP_SPEED = 80; // speed to step forward
@@ -142,9 +143,9 @@ char wallFollow() {
     irScan();
     irState = detectPostion();
     if (irState.irFull) {
-      digitalWrite(buzzerPin, HIGH);
-      delay(100);
-      digitalWrite(buzzerPin, LOW);
+      // digitalWrite(buzzerPin, HIGH);
+      // delay(100);
+      // digitalWrite(buzzerPin, LOW);
       // end
       forward(0, 0);
       return 'E';

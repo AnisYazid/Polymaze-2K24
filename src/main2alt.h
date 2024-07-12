@@ -3,7 +3,6 @@
 #include "tcs.h"
 
 
-TaskHandle_t main2Task = NULL;
 bool isEnd = false;
 
 void setupMain2() {
@@ -31,6 +30,6 @@ void loopMain2(void *parameter) {
 
 void startMain2() {
   xTaskCreatePinnedToCore(
-      loopMain2, "View", 10000, NULL, 1, &main2Task,
+      loopMain2, "View", 10000, NULL, 1, NULL,
       0); // 0 for core 0, 1 for higher priority, 10000 for stack size
 }
